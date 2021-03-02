@@ -1,0 +1,21 @@
+each(@color-list, {
+  .text-@{value} {
+    color: @@value;
+  }
+}) .text-gray {
+  color: @gray-5;
+}
+
+.text-lg {
+  font-size: 30px;
+  line-height: 38px;
+}
+
+.text-sm {
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.text-right {
+  text-align: right;
+}

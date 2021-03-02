@@ -5,8 +5,10 @@
     "build": "umi build",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
+    "lint": "eslint src/**/*.{ts,tsx} --fix",
     "test": "umi-test",
-    "test:coverage": "umi-test --coverage"
+    "test:coverage": "umi-test --coverage",
+    "trans-script": "pcg-plugins-locale-finder -d -i react-intl,umi"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
@@ -22,17 +24,41 @@
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
     "@umijs/preset-react": "1.x",
-    "umi": "^3.3.7"
+    "umi": "^3.3.7",
+    "@types/crypto-js": "^4.0.1",
+    "@umijs/test": "^3.2.14",
+    "antd": "^4.6.1",
+    "axios": "v0.21.1",
+    "bizcharts": "^4.0.13",
+    "classnames": "^2.2.6",
+    "core-js": "^3.6.5",
+    "crypto-js": "^4.0.0",
+    "js-base64": "^3.5.2",
+    "moment": "^2.27.0",
+    "prettier": "^2.2.1",
+    "react-intl": "^3.12.1"
   },
   "devDependencies": {
-    "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
-    "@umijs/test": "^3.3.7",
     "lint-staged": "^10.0.7",
-    "prettier": "^2.2.0",
     "react": "17.x",
     "react-dom": "17.x",
     "typescript": "^4.1.2",
-    "yorkie": "^2.0.0"
-  }
+    "yorkie": "^2.0.0",
+    "@babel/cli": "^7.11.6",
+    "@types/classnames": "^2.2.11",
+    "@types/react": "^16.9.46",
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "atool-l10n": "^0.3.1",
+    "babel-plugin-react-intl": "^3.0.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "eslint": "^7.8.0",
+    "eslint-config-umi": "^1.4.0",
+    "eslint-plugin-flowtype": "^2.50.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-react-hooks": "^4.1.0"
+    }
 }

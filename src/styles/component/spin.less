@@ -1,0 +1,87 @@
+@spin-dot-size: 20px;
+.spin {
+  position: relative;
+
+  &-loading {
+    position: absolute;
+    z-index: 999;
+    top: 50%;
+    left: 50%;
+    margin: -@spin-dot-size / 2;
+  }
+  &-container {
+    // position: absolute;
+  }
+  &-blur {
+    clear: both;
+    overflow: hidden;
+    opacity: 0.5;
+    user-select: none;
+    pointer-events: none;
+
+    &::after {
+      opacity: 0.4;
+      pointer-events: auto;
+    }
+  }
+
+  &-dot {
+    position: relative;
+    display: inline-block;
+    font-size: @spin-dot-size;
+    width: 1em;
+    height: 1em;
+
+    // .square(1em);
+
+    &-item {
+      position: absolute;
+      display: block;
+      width: 9px;
+      height: 9px;
+      background-color: @primary;
+      border-radius: 100%;
+      transform: scale(0.75);
+      transform-origin: 50% 50%;
+      opacity: 0.3;
+      animation: SpinMove 1s infinite linear alternate;
+
+      &:nth-child(1) {
+        top: 0;
+        left: 0;
+      }
+      &:nth-child(2) {
+        top: 0;
+        right: 0;
+        animation-delay: 0.4s;
+      }
+      &:nth-child(3) {
+        right: 0;
+        bottom: 0;
+        animation-delay: 0.8s;
+      }
+      &:nth-child(4) {
+        bottom: 0;
+        left: 0;
+        animation-delay: 1.2s;
+      }
+    }
+
+    &-spin {
+      transform: rotate(45deg);
+      animation: Rotate 1.2s infinite linear;
+    }
+  }
+}
+
+@keyframes SpinMove {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes Rotate {
+  to {
+    transform: rotate(405deg);
+  }
+}

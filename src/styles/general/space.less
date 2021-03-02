@@ -1,0 +1,28 @@
+// space
+.space {
+  .flex-middle();
+
+  > * {
+    margin-right: 8px !important;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.space-sm {
+  .space();
+
+  > * {
+    margin-right: 4px !important;
+  }
+}
+
+.space-md {
+  .space();
+
+  > * {
+    margin-right: 16px;
+  }
+}

@@ -1,0 +1,45 @@
+.app-menu-item {
+  display: inline-block;
+  user-select: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 6px 24px;
+  margin: 0 4px;
+  border-radius: @round-corner-sm;
+  color: @gray-5;
+  transition: all 200ms ease;
+
+  &:hover {
+    color: @gray-6;
+    background-color: @gray-1;
+  }
+}
+
+.app-menu-item-selected {
+  color: @primary !important;
+  background-color: @gray-1;
+}
+
+.menu-item {
+  .flex-middle();
+  color: @gray-6;
+  user-select: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: @round-corner-sm;
+  margin-bottom: 8px;
+  transition: all 200ms ease;
+
+  &:hover {
+    background-color: @gray-1;
+  }
+
+  .icon-sm {
+    margin-right: 8px;
+  }
+}
+
+.menu-item-selected {
+  color: @primary;
+  background-color: @gray-1;
+}
