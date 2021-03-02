@@ -1,0 +1,43 @@
+.symbol {
+  .flex-center();
+  border-radius: @round-corner;
+  width: @symbol-width;
+  height: $width;
+  font-size: 30px;
+
+  .row-flex & {
+    flex: none;
+    margin-right: 16px;
+  }
+}
+
+each(@color-list, {
+  .symbol-@{value} {
+    @value-light: replace(@value, '$', '-light');
+    color: darken(@@value , 10%);
+    background-color: @@value-light;
+    border-color: darken(@@value-light, 5%);
+  }
+})
+  .tag {
+  display: inline-block;
+  padding: 0 8px;
+  border: 1px solid @gray-3;
+  background-color: @gray-2;
+  font-size: 12px;
+  line-height: 20px;
+  border-radius: @round-corner-sm;
+}
+
+.tag-pointer {
+  cursor: pointer;
+}
+
+each(@color-list, {
+  .tag-@{value} {
+    @value-light: replace(@value, '$', '-light');
+    color: darken(@@value , 10%);
+    background-color: @@value-light;
+    border-color: darken(@@value-light, 5%);
+  }
+});

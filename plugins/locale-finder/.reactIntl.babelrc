@@ -1,0 +1,15 @@
+{
+  "presets": [
+    "@babel/preset-react",
+    "@babel/preset-env"
+  ],
+  "plugins": [
+    [
+      "react-intl",
+      {
+        "messagesDir": "localeFinder/i18n-messages",
+        "moduleSourceName":"umi"
+      }
+    ]
+  ]
+}

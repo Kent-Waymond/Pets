@@ -1,0 +1,18 @@
+// generate colored backgrounds
+
+each(@color-list, {
+  .bg-@{value} {
+    color: #fff;
+    background-color: @@value;
+
+    .text-gray {
+      color: rgba(255, 255, 255, .8);
+    }
+  }
+
+  .bg-@{value}-light {
+    @value-light: replace(@value, '$', '-light');
+
+    background-color: @@value-light;
+  }
+});

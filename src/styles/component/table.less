@@ -1,0 +1,151 @@
+.table {
+  width: 100%;
+
+  th,
+  td {
+    padding: 8px 16px;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  th {
+    color: @gray-5;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid @gray-3;
+  }
+}
+
+.table-headless {
+  th {
+    padding-top: 0;
+    padding-bottom: 0;
+    border: none;
+  }
+}
+
+ul.pagination {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.table-compact {
+  font-size: 12px;
+
+  th {
+    color: @gray-7;
+    border-bottom: 0;
+    background-color: @gray-1;
+  }
+
+  th,
+  td {
+    padding: 10px 16px !important;
+  }
+}
+
+.pagination-lite {
+  .flex-middle();
+
+  .btn-icon {
+    background-color: #fff;
+
+    &:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:last-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+
+  .pagination-item {
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 8px;
+    background-color: #fff;
+    color: @gray-5;
+
+    select {
+      height: inherit;
+      line-height: inherit;
+      border: none;
+    }
+
+    input {
+      height: 24px;
+      margin-right: 8px;
+      padding: 0 6px;
+      text-align: center;
+      background-color: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+    }
+  }
+}
+
+.th-w-symbol {
+  width: @symbol-width;
+}
+
+.th-w-action-1 {
+  width: 48px;
+}
+
+.th-w-action-2 {
+  width: 88px;
+}
+
+.th-w-action-3 {
+  width: 150px;
+}
+
+.th-w-progress {
+  min-width: 140px;
+  width: 20%;
+}
+
+.th-w-main {
+  min-width: 80px;
+  width: 15%;
+}
+
+.bh-link {
+  color: #0070cc;
+  cursor: pointer;
+}
+
+.pagination-position {
+  float: right;
+  margin: 15px 0;
+}
+
+// table {
+//   border-collapse: separate;
+//   border-spacing: 2px;
+//   text-align: left;
+// }
+
+// tbody {
+//   display: block;
+//   height: 350px;
+//   overflow-y: scroll;
+// }
+// thead, tbody tr {
+//   display: table;
+//   width: 100%;
+//   table-layout: fixed;
+// }
+// thead {
+//   width: calc( 100% - 1em);
+// }

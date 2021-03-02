@@ -1,0 +1,36 @@
+.progress {
+  display: flex;
+  width: 100%;
+  height: 22px;
+  align-items: center;
+}
+
+.progress-bg,
+.progress-bar {
+  height: 8px;
+  border-radius: 100px;
+}
+
+.progress-bg {
+  position: relative;
+  flex: auto;
+  background-color: @gray-2;
+}
+
+.progress-bar {
+  position: absolute;
+  width: 100%;
+  background-color: @primary;
+}
+
+.progress-text {
+  flex: 0;
+  margin-left: 8px;
+  color: @gray-6;
+}
+
+each(@color-list, {
+  .progress-@{value} {
+    background-color: @@value;
+  }
+});
