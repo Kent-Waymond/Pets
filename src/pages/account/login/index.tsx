@@ -2,25 +2,8 @@ import React from 'react';
 import { Form, Input, Button } from 'antd';
 import { useIntl, defineMessages, useDispatch, useHistory } from 'umi';
 import { BasicForm } from '@/components-compatible/Form/BasicForm';
+import { SET_IDENTITY, GET_IDENTITY } from '@/utils/auth';
 
-const intlMessages = defineMessages({
-  Username: {
-    id: 'account.form.Username',
-    defaultMessage: '用户名',
-  },
-  Password: {
-    id: 'account.form.Password',
-    defaultMessage: '密码',
-  },
-  Login: {
-    id: 'account.form.Login',
-    defaultMessage: '登录',
-  },
-  ProductName: {
-    id: 'common.ProductName',
-    defaultMessage: '爱宠云社区',
-  },
-});
 export default function LoginIndex() {
   const [form] = Form.useForm();
   const intl = useIntl();
@@ -31,8 +14,27 @@ export default function LoginIndex() {
     form.submit();
   }
 
+  function handlePassbyLogin() {
+    dispatch({
+      type: 'account/Login',
+      payload: {
+        phone: '123',
+        password: '1234567',
+      },
+    }).then((pass: boolean) => {
+      if (pass) {
+        history.push('/settings/feedback');
+      }
+    });
+  }
+
   function onFormSubmitFinish(formvalues: any) {
     console.log('values ', formvalues);
+    if (formvalues?.phone === 'root') {
+      SET_IDENTITY('admin');
+    } else if (formvalues?.phone !== 'root' || formvalues?.phone !== '123') {
+      SET_IDENTITY('petMaster');
+    }
     dispatch({
       type: 'account/Login',
       payload: {
@@ -40,7 +42,9 @@ export default function LoginIndex() {
       },
     }).then((pass: boolean) => {
       if (pass) {
+        console.log(GET_IDENTITY(), 'home');
         history.push('/');
+        // window.location.reload()
       } else {
         form.setFieldsValue({
           ...formvalues,
@@ -53,37 +57,31 @@ export default function LoginIndex() {
   return (
     <div className="ami-login">
       <div className="ami-login-container">
-        <div className="ami-brand">
-          {intl.formatMessage(intlMessages.ProductName)}
-        </div>
+        <div className="ami-brand">爱宠云社区</div>
         <BasicForm form={form} onFinish={onFormSubmitFinish}>
           <Form.Item
             initialValue=""
-            name="Username"
+            name="phone"
             rules={[
               {
                 required: true,
+                message: '请输入用户名',
               },
             ]}
           >
-            <Input
-              size="large"
-              placeholder={intl.formatMessage(intlMessages.Username)}
-            />
+            <Input size="large" placeholder="用户名" />
           </Form.Item>
           <Form.Item
             initialValue=""
-            name="Password"
+            name="password"
             rules={[
               {
                 required: true,
+                message: '请输入密码',
               },
             ]}
           >
-            <Input.Password
-              size="large"
-              placeholder={intl.formatMessage(intlMessages.Password)}
-            />
+            <Input.Password size="large" placeholder="密码" />
           </Form.Item>
           <Button
             type="primary"
@@ -92,9 +90,19 @@ export default function LoginIndex() {
             block
             // onClick={handleLogin}
           >
-            {intl.formatMessage(intlMessages.Login)}
+            登录
           </Button>
         </BasicForm>
+        <br />
+        <Button
+          type="default"
+          size="large"
+          htmlType="submit"
+          block
+          onClick={handlePassbyLogin}
+        >
+          游客登录
+        </Button>
       </div>
     </div>
   );

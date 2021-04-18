@@ -5,10 +5,10 @@ import {
   DeploymentUnitOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
-import { FormattedMessage, history } from 'umi';
+import { history } from 'umi';
 import Menu, { MenuItemType } from '@/components/menu';
-import { Row } from '@/components/grid';
-import Card, { CardBody, CardHeader } from '@/components/card';
+import { NewRow } from '@/components/grid';
+import { GET_IDENTITY } from '@/utils/auth';
 
 function handleMenuClick(key: string, selected: string[], event: any) {
   const targetPath = `/settings/${key}`;
@@ -17,24 +17,25 @@ function handleMenuClick(key: string, selected: string[], event: any) {
 
 const MenuItems: MenuItemType[] = [
   {
-    ItemKey: 'license',
-    title: (
-      <FormattedMessage id="settings.menu.licese" defaultMessage="许可管理" />
-    ),
+    ItemKey: 'community',
+    title: '萌宠社区',
     icon: <PropertySafetyOutlined className="icon-sm" />,
   },
   {
-    ItemKey: 'network',
-    title: (
-      <FormattedMessage id="settings.menu.network" defaultMessage="网络管理" />
-    ),
+    ItemKey: 'square',
+    title: '萌宠广场',
     icon: <DeploymentUnitOutlined className="icon-sm" />,
   },
   {
-    ItemKey: 'log',
-    title: (
-      <FormattedMessage id="settings.menu.log" defaultMessage="操作日志" />
-    ),
+    ItemKey: 'feedback',
+    title: '投诉与建议',
+    icon: <FileTextOutlined className="icon-sm" />,
+  },
+];
+const PassByItems: any = [
+  {
+    ItemKey: 'feedback',
+    title: '投诉与建议',
     icon: <FileTextOutlined className="icon-sm" />,
   },
 ];
@@ -42,6 +43,7 @@ const MenuItems: MenuItemType[] = [
 export default function (props: AppRouteComponentProps) {
   const { children } = props;
   const [currentKey, changeCurrentKey] = useState<string>('');
+  const currentUser = GET_IDENTITY();
 
   const handleMenuClick = useCallback(
     (key: string, selected: string[], event: any) => {
@@ -51,12 +53,19 @@ export default function (props: AppRouteComponentProps) {
     },
     [],
   );
+  console.log(currentUser, 'settings');
+
+  console.log(currentUser === 'passby' ? 'PassByItems' : 'MenuItems');
+
   return (
-    <Row flex={true} justify="stretch">
+    <NewRow flex={true} justify="stretch">
       <aside className="sider">
-        <Menu items={MenuItems} onClick={handleMenuClick} />
+        <Menu
+          items={currentUser === 'passby' ? PassByItems : MenuItems}
+          onClick={handleMenuClick}
+        />
       </aside>
       <div className="content">{children}</div>
-    </Row>
+    </NewRow>
   );
 }

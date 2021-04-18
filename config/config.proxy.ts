@@ -11,7 +11,7 @@ const { APP_PROXY_URL, NODE_ENV } = process.env;
 const PROXY_MAP: any = {
   development: {
     '/api': {
-      target: 'http://119.3.249.45:8080',
+      target: 'http://119.3.249.45:7070',
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
       secure: false,

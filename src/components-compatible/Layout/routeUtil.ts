@@ -7,6 +7,8 @@ export function formatterMenuDatas(
   currentAuthority: string,
   prefix: string = '',
 ): IAppMenuRecord[] {
+  // console.log(authority, '11111111111')
+  // console.log(currentAuthority, '22222222')
   if (authority.indexOf(currentAuthority) === -1) {
     return [];
   }
@@ -27,9 +29,14 @@ export function formatterMenuDatas(
         path: routes[i].path || '',
         name: formatMessage({ id: `menu.${prefix}${routes[i].name}` }),
         icon: routes[i].icon,
-        // 根据当前用户的类型和routes[i].authority对比，去设置hideInMenu
-        hideInMenu: routes[i].hideInMenu || false,
+        hideInMenu:
+          routes[i].hideInMenu ||
+          (routes[i].authority &&
+            routes[i].authority.indexOf(currentAuthority) === -1),
       };
+      // console.log(routes[i].path, routes[i].authority, '333333333')
+      // console.log(currentAuthority, '444444444444444')
+      // console.log(routes[i].authority && routes[i].authority.indexOf(currentAuthority) === -1, '55555555555555')
       if (routes[i].routes instanceof Array) {
         res.routes = formatterMenuDatas(
           routes[i].routes || [],

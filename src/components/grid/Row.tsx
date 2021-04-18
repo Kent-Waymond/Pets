@@ -22,7 +22,7 @@ function computeRowSizeClasses(size: RowSize) {
 function computeRowFlexJustifyClasses(justify: RowFlexJustifyType) {
   return ComputeTypeClasses('row-flex', '', justify, RowFlexJustifyTypes);
 }
-export function Row(props: IRowProps) {
+export function NewRow(props: IRowProps) {
   const { children, size, flex, justify } = props;
 
   const computeTextClassnames = useMemo(() => {

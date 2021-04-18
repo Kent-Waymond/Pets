@@ -24,7 +24,7 @@ function computeCardTypeClasses(type?: ComponentStateType) {
 
 const DefaultCardHeight = 300;
 
-export function Card(props: ICardProps) {
+export function NewCard(props: ICardProps) {
   const {
     cardClassNames,
     height,

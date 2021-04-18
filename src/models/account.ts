@@ -2,7 +2,13 @@ import { Subscription, Effect, formatMessage } from 'umi';
 import * as Service from '@/request/account';
 import { message } from 'antd';
 import { defineMessages } from 'react-intl';
-import { SET_APP_AUTH_TOKEN, REMOVE_APP_AUTH_TOKEN } from '@/utils/auth';
+import {
+  SET_APP_AUTH_TOKEN,
+  REMOVE_APP_AUTH_TOKEN,
+  SET_IDENTITY,
+  REMOVE_IDENTITY,
+  GET_IDENTITY,
+} from '@/utils/auth';
 interface IAccountModelType {
   namespace: 'account';
   state?: IAccountModelStates;
@@ -18,53 +24,52 @@ interface IAccountModelEffects {
   Logout: Effect;
 }
 
-const intlMessages = defineMessages({
-  LoginFail: {
-    id: 'account.model.LoginFail',
-    defaultMessage: '登录失败，账号或密码错误',
-  },
-});
-
 const Model: IAccountModelType = {
   namespace: 'account',
 
   effects: {
-    *Login({ payload: { Username, Password } }, { call }) {
-      const response = yield call(Service.Login, { Username, Password });
-      // const token = response?.data?.data?.token || '';
-      // if (response?.data?.code == '200' && token) {
-      //   if (token) {
-      //     SET_APP_AUTH_TOKEN(token);
-      //     return true;
-      // const token = response?.data?.data?.token || '';
-      // const res = response?.data?.data || '';
-      // if (response?.data?.code == '200' && res) {
-      //   if (res) {
-      //     console.log(res, 'login res');
-      //     return true
-      //   }
-      // } else {
-      //   message.error(formatMessage(intlMessages.LoginFail));
-      //   return false;
-      // }
-      SET_APP_AUTH_TOKEN('true');
-      return true;
+    *Login({ payload: { phone, password } }, { call }) {
+      const response = yield call(Service.Login, { phone, password });
+      const userId = response?.data?.data?.userId || '';
+      if (response?.data?.code == '200' && userId) {
+        if (userId) {
+          SET_APP_AUTH_TOKEN(userId);
+          if (userId === 'tourist') {
+            SET_IDENTITY('passby');
+          } else if (phone === 'root') {
+            SET_IDENTITY('admin');
+          } else {
+            SET_IDENTITY('petMaster');
+          }
+          message.success('登录成功！');
+          return true;
+          // const token = response?.data?.data?.token || '';
+          // const res = response?.data?.data || '';
+          // if (response?.data?.code == '200' && res) {
+          //   if (res) {
+          //     console.log(res, 'login res');
+          //     return true
+          //   }
+        } else {
+          message.error('账号或密码错误');
+          return false;
+        }
+      }
     },
-
     *Logout({}, { call }) {
       try {
         const response = yield call(Service.Logout);
       } catch (e) {
       } finally {
         REMOVE_APP_AUTH_TOKEN();
+        REMOVE_IDENTITY();
         window.location.reload();
+        return true;
       }
       // if (response?.data?.code == '200') {
       //   REMOVE_APP_AUTH_TOKEN();
       //   return true;
       // }
-
-      return false;
     },
   },
 };

@@ -8,6 +8,11 @@ declare module 'axios' {
       data?: any,
       config?: AxiosRequestConfig,
     ) => AxiosPromise<any>;
+    appGet: (
+      url: string,
+      data?: any,
+      config?: AxiosRequestConfig,
+    ) => AxiosPromise<any>;
     graphQueryPost: (
       url: string,
       data?: any,
@@ -52,6 +57,24 @@ axios.appPost = (
   return axios({
     url: `/api${url}`,
     method: 'post',
+    data,
+    ...config,
+    headers: {
+      'Content-Type': 'application/json',
+      // Authorization: `Bearer ${reqToken}`,
+    },
+  });
+};
+axios.appGet = (
+  url: string,
+  data: any,
+  config?: AxiosRequestConfig,
+): AxiosPromise<any> => {
+  // const reqToken = GET_APP_AUTH_TOKEN();
+
+  return axios({
+    url: `/api${url}`,
+    method: 'get',
     data,
     ...config,
     headers: {

@@ -1,12 +1,12 @@
-import { Row } from './Row';
-import { Col } from './Col';
+import { NewRow } from './Row';
+import { NewCol } from './Col';
 
 export type { IRowProps, RowSize, RowFlexJustifyType } from './Row';
 export type { IColProps } from './Col';
-export { Row, Col };
+export { NewRow, NewCol };
 
 const Grid = {
-  Row,
-  Col,
+  NewRow,
+  NewCol,
 };
 export default Grid;

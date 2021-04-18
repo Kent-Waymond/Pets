@@ -1,9 +1,9 @@
 import axios from './basicRequest';
 
-export function Login({ Username, Password }: any) {
+export function Login({ phone, password }: any) {
   return axios.appPost('/user/login', {
-    user_phonenumber: Username,
-    user_password: Password,
+    phone,
+    password,
   });
 }
 

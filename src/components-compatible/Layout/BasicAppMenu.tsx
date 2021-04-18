@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { IRoute, useHistory, useLocation } from 'umi';
 import { Menu } from 'antd';
-// import Icon from '@ant-design/icons';
+
 import { IAppMenuRecord } from './type';
 import { formatterMenuDatas } from './routeUtil';
 
@@ -14,21 +14,22 @@ const SubMenu = Menu.SubMenu;
 
 export function BasicAppMenu(props: IBasicAppMenuProps) {
   const { route, currentAuthority } = props;
+
   const { authority = [], routes = [] } = route;
-  console.log(authority, 'authority');
-  console.log(currentAuthority, 'currentAuthority');
-  console.log(routes, 'routes');
+  // console.log(authority, 'authority');
+  // console.log(currentAuthority, 'currentAuthority');
+  // console.log(routes, 'routes');
 
   const history = useHistory();
   const location = useLocation();
   const [selectedKeys, ChangeSelectedKey] = useState(['/']);
-  console.log(history, 'history');
-  console.log(location, 'location ');
+  // console.log(history, 'history');
+  // console.log(location, 'location ');
 
   const MenuDatas: IAppMenuRecord[] = useMemo(() => {
     return formatterMenuDatas(routes, authority, currentAuthority);
   }, [currentAuthority, authority, routes]);
-  console.log(MenuDatas, 'MenuDatas');
+  // console.log(MenuDatas, 'MenuDatas');
   useEffect(() => {
     ChangeSelectedKey([location.pathname]);
   }, [location.pathname]);

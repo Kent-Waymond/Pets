@@ -9,7 +9,6 @@ interface IAuthorizedProps {
 export default function Authorized(props: IAuthorizedProps) {
   const isLogin = Check_APP_AUTH_TOKEN();
   const { children } = props;
-  console.log(isLogin, 'isLogin');
   if (isLogin) {
     return <>{children}</>;
   }

@@ -1,6 +1,3 @@
-import { InstanceRecord } from '@/pages/instance/type';
-import { INodeRecord } from '../node/type.d';
-
 export interface IDashboardRecordStatisticType {
   StatisticTime: number;
   CPUPercent: number;
@@ -12,19 +9,17 @@ export interface IDashboardRecordStatisticType {
   Outbound: number;
 }
 
-export interface IDashboardNodeRecord
-  extends INodeRecord,
-    IDashboardRecordStatisticType {}
-
-export interface IDashboardInstanceRecord
-  extends InstanceRecord,
-    IDashboardRecordStatisticType {}
-
-export interface IDashboardCardChartData {
-  time: string;
-  value: number;
+export interface INoticeRecord {
+  noticeId: string;
+  noticeType: string;
+  locationId: string;
+  content: string;
+  title: string;
+  createTime: string;
+  firstPicture: string;
 }
 
+export interface INoticeProfile extends INoticeRecord {}
 export interface IDashboardStorageStatisticStatRecord {
   date: string;
   size: number;
@@ -37,4 +32,8 @@ export interface IDashboardStorageStatistic {
   predictDays: number;
   free: number;
   stats: IDashboardStorageStatisticStatRecord[];
+}
+export interface VaccineCountType {
+  VaccinedCount: number;
+  VaccineAllCount: number;
 }

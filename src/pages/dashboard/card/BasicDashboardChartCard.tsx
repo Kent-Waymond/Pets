@@ -7,7 +7,7 @@ import { ComponentStateType } from '@/components/_common/type';
 import classNames from 'classnames';
 
 interface IBasicDashboardChartCardProps {
-  chartData: any[];
+  chartData: any;
   ChartTitle?: React.ReactNode;
   ChartOverview?: React.ReactNode;
   xAxisKey?: string;
@@ -68,13 +68,13 @@ export function BasicDashboardChartCard(props: IBasicDashboardChartCardProps) {
         <>{restProps.ChartOverview}</>
       </CardBody>
       <CardChart>
-        <Chart scale={DashboardChartScale} data={chartData.slice(0)} autoFit>
+        <Chart scale={DashboardChartScale} data={chartData} autoFit>
           <Tooltip shared />
           <Axis name={xAxisKey || 'time'} visible={false} />
           <Axis name={yAxisKey || 'value'} visible={false} />
           <Area
             shape="smooth"
-            color={chartColor || 'rgba(255, 255, 255, .5)'}
+            color={chartColor || 'rgba(91,231,196,1)'}
             position={ChartPosition}
           />
           <Line

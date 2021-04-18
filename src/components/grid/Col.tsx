@@ -6,7 +6,7 @@ export interface IColProps {
   // TODO:确认grid属性名称
   grid?: boolean;
 }
-export function Col(props: IColProps) {
+export function NewCol(props: IColProps) {
   const { children, grid } = props;
 
   const computeColClasses = useMemo(() => {

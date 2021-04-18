@@ -1,44 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AppRouteComponentProps, IPlatformLicenseRecord } from '@/type';
+import { AppRouteComponentProps } from '@/type';
 import { Col, Row } from 'antd';
-import { DashboardCPUCard } from './card/DashboardCPUCard';
-import { DashboardMEMCard } from './card/DashboardMEMCard';
-import { DashboardStorageCard } from './card/DashboardStorageCard';
-import { ProductLicenseInfo } from './card/DashboardLicenseCard';
-import { DashboardLicenseCard } from './card/DashboardLicenseCard';
+import { PetsCard } from './card/PetsCard';
+import { VaccineCard } from './card/VaccineCard';
+import { DashboardPetCard } from './card/DashboardPetCard';
+import { DashboardVaccineCard } from './card/DashboardVaccineCard';
 import Avatar from '@/components/avatar';
-import {
-  SecurityScanTwoTone,
-  RocketTwoTone,
-  CrownTwoTone,
-} from '@ant-design/icons';
-import { DashboardNodeTableCard } from './table/DashboardNodeTableCard';
-import { DashboardInstanceTableCard } from './table/DashboardInstanceTableCard';
+import { NoticeCard } from './card/NoticeCard';
 import { useDispatch, useSelector } from 'umi';
-import {
-  IDashboardInstanceRecord,
-  IDashboardNodeRecord,
-  IDashboardRecordStatisticType,
-  IDashboardStorageStatistic,
-} from './type.d';
 import moment from 'moment';
 
 // 刷新页面请求
 function refreshDashboardData(dispatch: any) {
   dispatch({
-    type: 'dashboard/GetPlatformStorageStatistic',
-    payload: {
-      startTime: moment().subtract(14, 'days').startOf('day').unix(),
-    },
+    type: 'dashboard/ListNoticeRecords',
   });
   dispatch({
-    type: 'global/ListPlatformLicenses',
-  });
-  dispatch({
-    type: 'dashboard/ListDashboardInstanceRecords',
-  });
-  dispatch({
-    type: 'dashboard/ListDashboardNodeRecords',
+    type: 'dashboard/GetAllDataForDashboard',
   });
   intervalGetDashboardData(dispatch);
 }
@@ -46,111 +24,106 @@ function refreshDashboardData(dispatch: any) {
 // 定时轮询请求
 function intervalGetDashboardData(dispatch: any) {
   dispatch({
-    type: 'dashboard/ListDashboardPlatformStatisticRecords',
+    type: 'dashboard/GetAllDataForDashboard',
+  });
+  dispatch({
+    type: 'dashboard/ListNoticeRecords',
   });
 }
 export default function (props: AppRouteComponentProps) {
   const dispatch = useDispatch();
+  let PetTotalCount: number = 0;
+  let VaccinedCount: number = 0;
+  let NeedVaccineCount: number = 0;
+  let AllData: any;
 
-  const NodeRecords: IDashboardNodeRecord[] = useSelector(
-    (state: any) => state.dashboard.DashboardNodeRecords,
-  );
-  const InstanceRecords: IDashboardInstanceRecord[] = useSelector(
-    (state: any) => state.dashboard.DashboardInstanceRecords,
-  );
-  const StorageStatistic: IDashboardStorageStatistic = useSelector(
-    (state: any) => state.dashboard.DashboardStorageStatistic,
-  );
-  const PlatformStatisticRecords: IDashboardRecordStatisticType[] = useSelector(
-    (state: any) => state.dashboard.DashboardPlatformStatisticRecords,
-  );
-  const PlatformLicenses: IPlatformLicenseRecord[] = useSelector(
-    (state: any) => state.global.PlatformLicenses,
+  const AllDataForDashboard: any = useSelector(
+    (state: any) => state.dashboard.AllDataForDashboard,
   );
 
-  const NodeRecordLoading: boolean = useSelector(
-    (state: any) => state.loading.effects['dashboard/ListDashboardNodeRecords'],
+  const NoticeRecord: any = useSelector(
+    (state: any) => state.dashboard.NoticeRecord,
   );
-  const InstanceRecordLoading: boolean = useSelector(
-    (state: any) =>
-      state.loading.effects['dashboard/ListDashboardInstanceRecords'],
+  console.log(NoticeRecord, 'NoticeRecord');
+
+  const NoticeRecordLoading: boolean = useSelector(
+    (state: any) => state.loading.effects['dashboard/ListNoticeRecords'],
   );
-
-  // console.log("------- node ----------")
-  // console.log("NodeRecords ", NodeRecords)
-
-  // console.log("------- instance ----------")
-  // console.log("PlatformLicenses ", PlatformLicenses)
 
   useEffect(() => {
     refreshDashboardData(dispatch);
     const Timer = setInterval(() => {
       intervalGetDashboardData(dispatch);
-    }, 10000);
+    }, 60000);
     return () => {
       clearInterval(Timer);
     };
   }, [dispatch]);
 
-  const IncrementRecord = useMemo(() => {
-    if (PlatformStatisticRecords.length > 0) {
-      const CPURecords = PlatformStatisticRecords.map(
-        (record: IDashboardRecordStatisticType) => {
-          return {
-            time: record.StatisticTime,
-            value: record.CPUPercent,
-          };
-        },
-      ).reverse();
+  if (AllDataForDashboard) {
+    AllData = AllDataForDashboard?.data?.data;
+    if (AllData) {
+      let petObj: any = {};
+      AllData.forEach((item: any) => {
+        PetTotalCount += item.pets;
+        VaccinedCount += item.counts;
+        NeedVaccineCount += item.pets * item.vaccines;
+      });
+      // console.log(PetTotalCount, 'PetTotalCount')
+      // console.log(VaccinedCount, 'VaccinedCount')
+      // console.log(NeedVaccineCount, 'NeedVaccineCount')
 
-      const MEMRecords = PlatformStatisticRecords.map(
-        (record: IDashboardRecordStatisticType) => {
-          return {
-            time: record.StatisticTime,
-            value: record.MEMUsed,
-          };
-        },
-      ).reverse();
-
-      return {
-        CPURecords,
-        MEMRecords,
-      };
+      //
+      // VaccinedRecord = AllData.map((item: any) => {
+      // let vaccinedObj: any = {}
+      //   return vaccinedObj[item.petSpecies] = item.counts
+      // })
+      // console.log(VaccinedRecord, 'VaccinedRecord')
     }
-    return {
-      CPURecords: [],
-      MEMRecords: [],
-    };
-  }, [PlatformStatisticRecords]);
-  // console.log("IncrementRecord ", IncrementRecord)
+  }
+
   return (
     <>
-      <Row gutter={24} className="row-lg">
-        <Col span={6}>
-          <div className="row-lg">
-            <DashboardCPUCard IncrementRecords={IncrementRecord.CPURecords} />
-          </div>
-          <div className="row-lg">
-            <DashboardMEMCard IncrementRecords={IncrementRecord.MEMRecords} />
-          </div>
-        </Col>
-        <Col span={12}>
-          <DashboardStorageCard StorageStatistic={StorageStatistic} />
-        </Col>
-        <Col span={6}>
-          <DashboardLicenseCard PlatformLicenses={PlatformLicenses} />
-        </Col>
-      </Row>
-      <div className="row-lg">
-        <DashboardNodeTableCard
-          records={NodeRecords}
-          loading={NodeRecordLoading}
+      <div className="row-lg" style={{ margin: '0 auto' }}>
+        {/* 公告 */}
+        <NoticeCard
+          records={NoticeRecord}
+          loading={NoticeRecordLoading}
+          refresh={refreshDashboardData}
         />
       </div>
+      <Row gutter={24} className="row-lg" style={{ marginTop: 20 }}>
+        <Col span={3}></Col>
+        <Col span={4}>
+          {/* 宠物数量 */}
+          <div className="row-lg">
+            <PetsCard PetCount={PetTotalCount} />
+          </div>
+          {/* 接种率 */}
+          <div className="row-lg">
+            <VaccineCard
+              VaccinedCount={VaccinedCount}
+              VaccineAllCount={NeedVaccineCount}
+            />
+          </div>
+        </Col>
+        <Col span={14}>
+          {/* 宠物总览 */}
+          <DashboardPetCard
+            type="pets"
+            PetStatistic={AllData}
+            PetCount={PetTotalCount}
+          />
+        </Col>
+        <Col span={3}></Col>
+      </Row>
+
       <div className="row-lg">
-        <DashboardInstanceTableCard
-          records={InstanceRecords}
-          loading={InstanceRecordLoading}
+        {/* 接种总览 */}
+        <DashboardVaccineCard
+          type="vaccine"
+          VaccineStatistic={AllData}
+          VaccinedCount={VaccinedCount}
         />
       </div>
     </>
