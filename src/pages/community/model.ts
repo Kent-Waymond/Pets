@@ -28,6 +28,7 @@ interface IModelEffects {
   GetCommunityProfile: Effect;
   CreateCMoment: Effect;
   RemoveCommunity: Effect;
+  UploadImage: Effect;
 
   ListMyMoments: Effect;
   GetMyMomentProfile: Effect;
@@ -116,6 +117,16 @@ const Model: IModelType = {
         message.error('删除失败');
         return null;
       }
+    },
+    *UploadImage({ payload: { name, CurrentUserID } }, { call, put }) {
+      const response = yield call(Service.UploadImage, { name, CurrentUserID });
+      console.log(response, 'response');
+      if (response?.data?.code == '200') {
+        message.success('上传成功');
+      } else {
+        message.error('上传失败');
+      }
+      return response;
     },
     *GetCommunityProfile({ payload: { essayId } }, { call, put }) {
       const response = yield call(Service.GetCommunity, { essayId });

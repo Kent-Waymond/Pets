@@ -1,4 +1,4 @@
-import { GET_APP_AUTH_TOKEN } from '@/utils/auth';
+import { GET_USER_TOKEN } from '@/utils/auth';
 import axios, { AxiosRequestConfig, AxiosPromise } from 'axios';
 
 declare module 'axios' {
@@ -52,7 +52,7 @@ axios.appPost = (
   data: any,
   config?: AxiosRequestConfig,
 ): AxiosPromise<any> => {
-  // const reqToken = GET_APP_AUTH_TOKEN();
+  // const reqToken = GET_USER_TOKEN();
 
   return axios({
     url: `/api${url}`,
@@ -70,7 +70,7 @@ axios.appGet = (
   data: any,
   config?: AxiosRequestConfig,
 ): AxiosPromise<any> => {
-  // const reqToken = GET_APP_AUTH_TOKEN();
+  // const reqToken = GET_USER_TOKEN();
 
   return axios({
     url: `/api${url}`,
@@ -90,7 +90,6 @@ export interface IGraphQueryFilter {
   value: string;
   operator: string;
 }
-// TODO:提取方法至单独文件
 function normalizeQuerySql(
   table: string,
   filters: IGraphQueryFilter[],
@@ -143,7 +142,7 @@ axios.graphQueryPost = (
   // console.log('sql  ', sql);
   formdata.append('q', sql);
 
-  const reqToken = GET_APP_AUTH_TOKEN();
+  const reqToken = GET_USER_TOKEN();
 
   return axios({
     baseURL: `${queryBaseURL}`,

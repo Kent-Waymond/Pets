@@ -24,7 +24,7 @@ export function ListAuditVaccines({ PageNumber, PageSize }: any) {
   return axios.appGet(`/admin/injectList/${PageNumber}/${PageSize}`);
 }
 // SearchVaccine
-export function SearchVaccine({ Keyword }: any) {
+export function SearchVaccine({ Keyword, species }: any) {
   return axios.appGet(`/admin/findVaccine/${Keyword}`);
 }
 // DeleteVaccine

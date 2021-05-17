@@ -157,20 +157,26 @@ class UserTable extends React.PureComponent<IUserTableProps, IUserTableStates> {
   }
 
   static getDerivedStateFromProps(nextProps: IUserTableProps) {
-    const { PetRecord, UserRecordProps } = nextProps;
+    const { UserRecordProps } = nextProps;
     if (UserRecordProps) {
       return {
-        // PetRecords: PetRecord['pets'],
-        // PetsCount: PetRecord.count,
         UserRecords: UserRecordProps,
+        UserCount: UserRecordProps.length,
       };
     }
     return null;
   }
 
   public handleSearch = (ev: any) => {
-    // console.log('search');
-    this.resetPageInfo();
+    const { Keyword, PageNumber, PageSize } = this.state;
+    const { dispatch } = this.props;
+
+    dispatch({
+      type: 'info/SearchUserRecords',
+      payload: {
+        name: Keyword,
+      },
+    });
   };
 
   public handleChange = (ev: any) => {

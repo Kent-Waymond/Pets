@@ -18,6 +18,10 @@ export function CreateSMoment({
 export function ListSquares({ pageNumber, pageSize }: any) {
   return axios.appPost(`/article/essayListSquare/${pageNumber}/${pageSize}`);
 }
+// ListComments
+export function ListComments({ essayId }: any) {
+  return axios.appPost(`/comments/essay/${essayId}`);
+}
 // SearchSquares
 export function SearchSquares({ Keyword, pageNumber, pageSize }: any) {
   return axios.appPost(

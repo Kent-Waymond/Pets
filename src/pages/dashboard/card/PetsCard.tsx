@@ -3,6 +3,8 @@ import Text from '@/components/text';
 import { formatTimestamp } from '@/utils/date';
 import { ScaleOption } from 'bizcharts/lib/interface';
 import { BasicDashboardChartCard } from './BasicDashboardChartCard';
+import { Link } from 'umi';
+import { GET_IDENTITY } from '@/utils/auth';
 
 interface IPetsCardProps {
   PetCount: number;
@@ -14,6 +16,7 @@ function TimeSecondsLabelFormatter(text: string) {
 
 export function PetsCard(props: IPetsCardProps) {
   const { PetCount } = props;
+  const currentUser = GET_IDENTITY();
 
   const lastestPetCount: number = useMemo(() => {
     return PetCount;
@@ -45,9 +48,10 @@ export function PetsCard(props: IPetsCardProps) {
         </Text>
       }
       ChartOverview={
-        <Text size="lg" block>
-          {/* {lastestPetCount ?? 52} */}52
-        </Text>
+        // 只有管理员可以跳转到所有宠物表页面
+        <Link to={currentUser === 'admin' ? '/info' : '#'}>
+          <h1 style={{ color: 'white' }}> {/* {lastestPetCount ?? 52} */}52</h1>
+        </Link>
       }
     />
   );

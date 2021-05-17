@@ -1,24 +1,24 @@
 import { Base64 } from 'js-base64';
 
 // app 认证token
-const APP_AUTH_TOKEN = '_ami_app_auth_token';
+const USER_TOKEN = '_ami_USER_token';
 
-export function GET_APP_AUTH_TOKEN() {
-  return localStorage.getItem(APP_AUTH_TOKEN) || '';
+export function GET_USER_TOKEN() {
+  return localStorage.getItem(USER_TOKEN) || '';
 }
 
-export function SET_APP_AUTH_TOKEN(token: string) {
-  localStorage.setItem(APP_AUTH_TOKEN, token || '');
+export function SET_USER_TOKEN(token: string) {
+  localStorage.setItem(USER_TOKEN, token || '');
 }
 
-export function REMOVE_APP_AUTH_TOKEN() {
-  localStorage.removeItem(APP_AUTH_TOKEN);
+export function REMOVE_USER_TOKEN() {
+  localStorage.removeItem(USER_TOKEN);
 }
 
-export function Check_APP_AUTH_TOKEN(token?: string): boolean {
+export function Check_USER_TOKEN(token?: string): boolean {
   let authToken = token;
   if (!authToken) {
-    authToken = GET_APP_AUTH_TOKEN();
+    authToken = GET_USER_TOKEN();
   }
   if (authToken) {
     return true;

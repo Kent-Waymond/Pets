@@ -35,7 +35,7 @@ export function CreatePet({
 }
 // GetPetProfile
 export function GetPetProfile({ petId }: any) {
-  return axios.appPost(`/pet/detail/${petId}`);
+  return axios.appGet(`/pet/detail/${petId}`);
 }
 // RemovePet
 export function RemovePet({ petId }: any) {
@@ -60,6 +60,10 @@ export function ListPetRecords({ Keyword, PageNumber, PageSize }: any) {
 // SearchPetRecords
 export function SearchPetRecords({ species }: any) {
   return axios.appGet(`/admin/findPet/${species}`);
+}
+// SearchUserRecords
+export function SearchUserRecords({ name }: any) {
+  return axios.appGet(`/admin/findUser/${name}`);
 }
 
 // ListAllUsers

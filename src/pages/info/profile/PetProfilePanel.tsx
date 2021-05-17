@@ -7,10 +7,13 @@ import { PetForm } from '../form/PetForm';
 
 interface IPetProfilePanelProps extends DrawerProps {
   // title: React.ReactNode;
+  visible: boolean;
+  onClose: (ev: any) => void;
+  PetProfile: any;
 }
 
 function PetProfilePanel(props: IPetProfilePanelProps) {
-  const { visible, onClose } = props;
+  const { PetProfile, visible, onClose } = props;
 
   const dispatch = useDispatch<any>();
   const [UpdateLoading, ChangeUpdateLoaidng] = useState<boolean>(false);

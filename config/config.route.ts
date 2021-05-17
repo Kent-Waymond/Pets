@@ -49,6 +49,7 @@ const PageRoutes: IRoute[] = [
         component: '@/pages/settings',
         authority: ['admin', 'petMaster', 'passby'],
         routes: [
+          // TODO 管理员不展示comminity 和 square ?
           {
             path: 'community',
             name: 'community',
@@ -66,6 +67,18 @@ const PageRoutes: IRoute[] = [
             name: 'feedback',
             component: '@/pages/feedback',
             authority: ['admin', 'petMaster', 'passby'],
+          },
+          {
+            path: 'myfeedback',
+            name: 'myfeedback',
+            component: '@/pages/myfeedback',
+            authority: ['petMaster', 'passby'],
+          },
+          {
+            path: 'moment',
+            name: 'moment',
+            component: '@/pages/moment',
+            authority: ['admin', 'petMaster'],
           },
         ],
       },

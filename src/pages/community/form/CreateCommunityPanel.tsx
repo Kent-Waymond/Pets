@@ -5,7 +5,7 @@ import { useDispatch } from 'umi';
 import Editor from 'for-editor';
 import { BasicForm } from '@/components-compatible/Form/BasicForm';
 import { BasicFormItem } from '@/components-compatible/Form/BasicForm';
-import axios from '@/request/basicRequest';
+import { GET_USER_TOKEN } from '@/utils/auth';
 const { Option } = Select;
 
 interface ICreateCommunityPanelProps extends DrawerProps {
@@ -14,14 +14,13 @@ interface ICreateCommunityPanelProps extends DrawerProps {
 }
 
 function CreateCommunityPanel(props: ICreateCommunityPanelProps): any {
+  const EditorRef: any = React.createRef();
   const { visible, onClose } = props;
-
+  const CurrentUserID = GET_USER_TOKEN();
   const dispatch = useDispatch<any>();
   const [createLoading, ChangeCreateLoaidng] = useState<boolean>(false);
-
   const [editorValue, changeEditorValue] = useState<string>('');
-  const [ImageUrl, changeImageUrl] = useState<string>('');
-
+  let ImageArr: any = [];
   const [form] = Form.useForm();
 
   function handleDrawerClose(ev: any) {
@@ -38,29 +37,41 @@ function CreateCommunityPanel(props: ICreateCommunityPanelProps): any {
 
   async function onFormFinish(formvalues: any) {
     ChangeCreateLoaidng(true);
-    // TODO 提交editor  一起作为参数传过去
+    console.log(ImageArr, 'ImageArr');
 
     const id = await dispatch({
       type: 'community/CreateCMoment',
       payload: {
-        essayType: formvalues?.CommunityName || '',
-        essayContent: editorValue || '',
-        essayRange: formvalues?.CommunityType || '',
+        essayType: formvalues?.CommunityType || '',
+        essayContent:
+          editorValue + ',ImageUrl,' + JSON.stringify(ImageArr) || '',
+        essayRange: 1,
         title: formvalues?.CommunityName || '',
       },
     });
 
     if (id) {
       ChangeCreateLoaidng(false);
+      onClose();
     }
   }
   const uploadHandler = (file: File) => {
-    axios.appPost('/uploadImg', { file }).then((res: any) => {
-      // TODO 路径
-      changeImageUrl('http://100.0.01//' + res);
-      let str = editorValue + '![alt](http://100.0.01//' + res + ')';
-      changeEditorValue(str);
-    });
+    if (file) {
+      dispatch({
+        type: 'community/UploadImage',
+        payload: {
+          name: file,
+          CurrentUserID,
+        },
+      }).then((response: any) => {
+        if (response?.data?.data) {
+          ImageArr.push('119.3.249.45:7070/file/image/' + response?.data?.data);
+        }
+      });
+    }
+  };
+  const handleChange = (value: any) => {
+    changeEditorValue(value);
   };
 
   const drawerFooter = (
@@ -70,6 +81,22 @@ function CreateCommunityPanel(props: ICreateCommunityPanelProps): any {
       </Button>
     </div>
   );
+  const toolBar = {
+    h1: false, // h1
+    h2: false, // h2
+    h3: false, // h3
+    h4: false, // h4
+    img: true, // 图片
+    link: false, // 链接
+    code: false, // 代码块
+    preview: true, // 预览
+    expand: true, // 全屏
+    undo: true, // 撤销
+    redo: true, // 重做
+    save: false, // 保存
+    subfield: true, // 单双栏模式
+    addImgLink: false,
+  };
   return (
     <Drawer
       title="发布动态"
@@ -128,9 +155,10 @@ function CreateCommunityPanel(props: ICreateCommunityPanelProps): any {
         <Editor
           subfield={true}
           preview={true}
-          addImg={(file) => uploadHandler(file)}
+          addImg={(file, fileList) => uploadHandler(file)}
           value={editorValue}
-          onChange={(value) => changeEditorValue(value)}
+          onChange={(value) => handleChange(value)}
+          toolbar={toolBar}
         />
       </>
     </Drawer>

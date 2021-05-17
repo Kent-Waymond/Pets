@@ -1,9 +1,13 @@
 export interface SquareRecord {
-  essay_id: string;
-  user_id: string;
-  essay_type: string;
-  essay_content: string;
-  essay_range: string;
+  essayId: string;
+  userId: string;
+  title: string;
+  nickname: string;
+  createTime: string;
+  essayType: string;
+  essayContent: string;
+  firstPicture: any;
+  essayRange: string;
 }
 
 export interface SquareProfile extends SquareRecord {}

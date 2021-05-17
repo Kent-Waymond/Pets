@@ -38,6 +38,8 @@
     "prettier": "^2.2.1",
     "react-intl": "^3.12.1",
     "react-markdown": "^5.0.3",
+    "rich-markdown-editor": "^11.6.7",
+    "styled-components": "^5.2.3",
     "umi": "^3.3.7"
   },
   "devDependencies": {
@@ -58,8 +60,6 @@
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-react-hooks": "^4.1.0",
     "lint-staged": "^10.0.7",
-    "react": "17.x",
-    "react-dom": "17.x",
     "typescript": "^4.1.2",
     "yorkie": "^2.0.0"
   }

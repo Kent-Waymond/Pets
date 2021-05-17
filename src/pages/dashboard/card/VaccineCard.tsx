@@ -3,6 +3,8 @@ import Text from '@/components/text';
 import { formatTimestamp } from '@/utils/date';
 import { ScaleOption } from 'bizcharts/lib/interface';
 import { BasicDashboardChartCard } from './BasicDashboardChartCard';
+import { Link } from 'umi';
+import { GET_IDENTITY } from '@/utils/auth';
 
 interface IVaccineCardProps {
   VaccinedCount: number;
@@ -15,6 +17,8 @@ function TimeSecondsLabelFormatter(text: string) {
 
 export function VaccineCard(props: IVaccineCardProps) {
   const { VaccinedCount, VaccineAllCount } = props;
+  const currentUser = GET_IDENTITY();
+
   const [VaccinedRate, changeVaccinedRate] = useState<number>(0);
   useEffect(() => {
     if (VaccinedCount == 0) {
@@ -49,10 +53,10 @@ export function VaccineCard(props: IVaccineCardProps) {
         </Text>
       }
       ChartOverview={
-        <Text size="lg" block>
+        <Link to={currentUser === 'admin' ? '/vaccine' : '#'}>
           {/* {VaccinedRate ?? 30.8 + '%'} */}
-          {30.8 + '%'}
-        </Text>
+          <h1 style={{ color: 'gray' }}> {30.8 + '%'}</h1>
+        </Link>
       }
     />
   );

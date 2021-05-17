@@ -1,8 +1,8 @@
 import React from 'react';
-import { connect, FormattedMessage } from 'umi';
-import { defineMessages, injectIntl, IntlShape } from 'react-intl';
+import { connect } from 'umi';
+import { injectIntl, IntlShape } from 'react-intl';
 import { IBHRawListDataRecord } from '@/type';
-import { VaccineProfile, VaccineRecord } from '../type.d';
+import { VaccineRecord } from '../type.d';
 import {
   MenuOutlined,
   RedoOutlined,
@@ -19,13 +19,16 @@ import Text from '@/components/text';
 import { stringSlice } from '@/utils/string';
 import Tag from '@/components/tag';
 import Space from '@/components/space';
-import { Drawer, Popconfirm } from 'antd';
+import { Drawer, Popconfirm, Select } from 'antd';
 import CreateVaccinePanel from '../form/CreateVaccinePanel';
 import Pagination from '@/components/pagination';
 import UploadLicensePanel from '../form/UploadLicensePanel';
 import PetsTable from '@/pages/info/table/PetsTable';
 import AuditVaccineCard from '../card/AuditVaccineCard';
 import { GET_IDENTITY } from '@/utils/auth';
+import { history } from 'umi';
+const { Option } = Select;
+
 let currentUser = '';
 
 interface VaccineTableProps {
@@ -41,7 +44,10 @@ interface VaccineTableState {
   VaccinesCount: number;
 
   VaccineProfile: VaccineRecord | null;
+  SelectKeyword: string;
   Keyword: string;
+  VaccineId: string;
+  PetProfileId: string;
   PageNumber: number;
   PageSize: number;
 
@@ -62,6 +68,7 @@ class VaccineTable extends React.PureComponent<
 > {
   private AdminTableColumns: IColumnType<VaccineRecord>[];
   private PetmasterTableColumns: IColumnType<VaccineRecord>[];
+  private keyword: any = history.location.query?.keyword;
   constructor(props: VaccineTableProps) {
     super(props);
     this.state = {
@@ -69,6 +76,9 @@ class VaccineTable extends React.PureComponent<
       VaccinesCount: 0,
       VaccineProfile: null,
       Keyword: '',
+      SelectKeyword: '',
+      VaccineId: '',
+      PetProfileId: '',
 
       PageNumber: 1,
       PageSize: 20,
@@ -163,14 +173,34 @@ class VaccineTable extends React.PureComponent<
         title: '疫苗类型',
         key: 'vaccineType',
         dataIndex: 'vaccineType',
-        render: (text: string, record: VaccineRecord) => (
-          <Text title={text}>{stringSlice(text)}</Text>
-        ),
+        render: (text: string, record: VaccineRecord) => {
+          return <Text title={text}>{stringSlice(text)}</Text>;
+        },
       },
       {
         title: '宠物类型',
         key: 'vaccinePetType',
         dataIndex: 'vaccinePetType',
+        render: (text: string) => {
+          return <Text>{text}</Text>;
+        },
+      },
+      {
+        title: '添加时间',
+        key: 'createTime',
+        dataIndex: 'createTime',
+        render: (text: string) => {
+          return (
+            <>
+              <Text>{text ? formatStringTime(text) : ''}</Text>
+            </>
+          );
+        },
+      },
+      {
+        title: '备注',
+        key: 'remarks',
+        dataIndex: 'remarks',
         render: (text: string) => {
           return (
             <>
@@ -183,28 +213,21 @@ class VaccineTable extends React.PureComponent<
         title: '接种状态',
         key: 'vaccineStatus',
         dataIndex: 'vaccineStatus',
-        render: (text: string) => {
+        render: (text: string, record: VaccineRecord) => {
           return (
-            <Tag status={stateMap[text]}>
-              {text === 'Unvaccinated ' ? '未接种' : '已接种'}
-            </Tag>
-          );
-        },
-      },
-      {
-        key: 'Action',
-        dataIndex: 'id',
-        className: 'th-w-action-2',
-        render: (vaccineId: string, record: VaccineRecord) => {
-          return (
-            <Space>
-              {currentUser === 'admin' && (
+            <>
+              <Tag status={stateMap[text]}>
+                {text === 'Unvaccinated ' ? '未接种' : '已接种'}
+              </Tag>
+              {text === 'Unvaccinated' && (
                 <Button
-                  icon={<DeleteOutlined />}
-                  onClick={() => this.DeleteVaccine(record?.vaccineId)}
-                />
+                  type="primary"
+                  onClick={() => this.openUploadLicensePanel(record?.vaccineId)}
+                >
+                  上传疫苗证明
+                </Button>
               )}
-            </Space>
+            </>
           );
         },
       },
@@ -296,12 +319,6 @@ class VaccineTable extends React.PureComponent<
     });
   };
 
-  public ReuploadProof = (vaccineId: string) => {
-    // 打开上传页，传入参数和图片即可
-  };
-
-  public UploadProof = (vaccineId: string) => {};
-
   public openCreatePanel = () => {
     this.setState({
       CreateVaccineVisible: true,
@@ -329,7 +346,6 @@ class VaccineTable extends React.PureComponent<
         PageSize: 20,
       },
     }).then((Count: number) => {
-      console.log(Count, 'counr');
       this.setState({
         VaccinesCount: Count,
       });
@@ -371,9 +387,10 @@ class VaccineTable extends React.PureComponent<
     });
   };
 
-  public openUploadLicensePanel = () => {
+  public openUploadLicensePanel = (vaccineId: string) => {
     this.setState({
       UploadLicenseVisible: true,
+      VaccineId: vaccineId,
     });
   };
   public closeUploadLicensePanel = () => {
@@ -381,9 +398,46 @@ class VaccineTable extends React.PureComponent<
       UploadLicenseVisible: false,
     });
   };
+
+  public SearchVaccineRecords = (keyword?: string) => {
+    const { SelectKeyword } = this.state;
+    const { dispatch } = this.props;
+    console.log(keyword, 'keyword111');
+    dispatch({
+      type: 'vaccine/SearchVaccineRecords',
+      payload: {
+        species: keyword ?? SelectKeyword,
+      },
+    });
+  };
+  public handleSelect = (value: string) => {
+    this.setState(
+      {
+        SelectKeyword: value,
+      },
+      () => {
+        if (value == '') {
+          this.resetPageInfo();
+        } else {
+          this.SearchVaccineRecords();
+        }
+      },
+    );
+  };
+
   componentDidMount() {
+    console.log(this.keyword);
+
     currentUser = GET_IDENTITY();
-    this.ListVaccineRecords();
+    if (this.keyword) {
+      this.setState({
+        SelectKeyword: this.keyword,
+      });
+      // TODO 根据宠物类型
+      this.SearchVaccineRecords();
+    } else {
+      this.ListVaccineRecords();
+    }
   }
 
   static getDerivedStateFromProps(
@@ -412,6 +466,7 @@ class VaccineTable extends React.PureComponent<
       VaccineProfileVisible,
       CreateVaccineVisible,
       UploadLicenseVisible,
+      SelectKeyword,
     } = this.state;
 
     return (
@@ -423,6 +478,34 @@ class VaccineTable extends React.PureComponent<
                 添加疫苗
               </Button>
               <Space>
+                <Select
+                  showSearch
+                  style={{ width: 300 }}
+                  allowClear
+                  placeholder="宠物类型搜索"
+                  onSelect={this.handleSelect}
+                  value={SelectKeyword}
+                  // onKeyDown={this.onKeyDownchange}
+                >
+                  {/* <Option value="" title="">
+                    宠物类型搜索
+                    </Option> */}
+                  <Option value="汪星人" title="汪星人">
+                    汪星人
+                  </Option>
+                  <Option value="喵星人" title="喵星人">
+                    喵星人
+                  </Option>
+                  <Option value="啮齿动物" title="啮齿动物">
+                    啮齿动物
+                  </Option>
+                  <Option value="猛禽" title="猛禽">
+                    猛禽
+                  </Option>
+                  <Option value="爬行动物" title="爬行动物">
+                    爬行动物
+                  </Option>
+                </Select>
                 <div className="control search">
                   <input
                     type="text"
@@ -463,6 +546,7 @@ class VaccineTable extends React.PureComponent<
             <div style={{ margin: 20 }}></div>
             <NewCard>
               <CardBody>
+                {/* TODO 疫苗审核 */}
                 <AuditVaccineCard />
               </CardBody>
             </NewCard>
@@ -493,39 +577,34 @@ class VaccineTable extends React.PureComponent<
           <></>
         )}
         <div style={{ margin: 18 }}></div>
-        {
-          // TODO如果是养宠用户  则展示  并且上传接种证明  表格项不一样
-          currentUser === 'petMaster' ? (
-            <>
-              <PetsTable type="vaccine" />
-              <div style={{ margin: 15 }}></div>
-              <NewCard>
-                <CardHeader title="疫苗总览"></CardHeader>
-                <CardBody>
-                  <>
-                    <BasicTable<VaccineRecord>
-                      columns={this.PetmasterTableColumns}
-                      rowKey="vaccineId"
-                      dataSource={Vaccines}
-                      // loading={VaccineModelLoading}
-                    />
-                  </>
-                </CardBody>
-              </NewCard>
-            </>
-          ) : (
-            <></>
-          )
-        }
-        {/* 上传证明 
-        {
-          UploadLicenseVisible && (
-            <>
-              <UploadLicensePanel visible={UploadLicenseVisible} onClose={this.closeUploadLicensePanel} />
-            </>
-          )
-        }
-        */}
+        {currentUser === 'petMaster' ? (
+          <>
+            {/* // TODO如果是养宠用户  则展示  并且上传接种证明  表格项不一样 */}
+            <PetsTable type="vaccine" />
+            <div style={{ margin: 15 }}></div>
+            <NewCard>
+              <CardHeader title="疫苗总览"></CardHeader>
+              <CardBody>
+                <>
+                  <BasicTable<VaccineRecord>
+                    columns={this.PetmasterTableColumns}
+                    rowKey="vaccineId"
+                    dataSource={Vaccines}
+                    // loading={VaccineModelLoading}
+                  />
+                </>
+              </CardBody>
+            </NewCard>
+          </>
+        ) : (
+          <></>
+        )}
+        {/* TODO 上传证明 在宠主的宠物列表  */}
+        {UploadLicenseVisible && (
+          <>
+            {/* <UploadLicensePanel VaccineId={VaccineId} PetProfileId={PetProfileId} visible={UploadLicenseVisible} onClose={this.closeUploadLicensePanel} /> */}
+          </>
+        )}
       </>
     );
   }

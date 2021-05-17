@@ -5,11 +5,11 @@ import Card, {
   CardHeader,
   CardRow,
 } from '@/components/card';
-import { Chart, Area, Line, Tooltip, Axis, Interval } from 'bizcharts';
+import { Chart, Tooltip, Axis, Interval } from 'bizcharts';
 import Text from '@/components/text';
-import Progress from '@/components/progress';
-import { useIntl } from 'umi';
-import { formatStringTime, formatTimestamp } from '@/utils/date';
+import { useIntl, history } from 'umi';
+import { Link } from 'umi';
+import { GET_IDENTITY } from '@/utils/auth';
 
 interface IDashboardVaccineCardProps {
   VaccineStatistic: any;
@@ -26,13 +26,9 @@ const DefaultVaccineStatistic: any = {
   reptiles: 2, // 爬行动物
 };
 
-function DateLabelFormatter(text: string) {
-  return formatStringTime(text, 'HH:mm:ss');
-}
-
 export function DashboardVaccineCard(props: IDashboardVaccineCardProps) {
   const { VaccineStatistic, type, VaccinedCount } = props;
-
+  const currentUser = GET_IDENTITY();
   const record = [];
   let objALL = { type: '总计', number: VaccinedCount };
   record.push(objALL);
@@ -93,6 +89,23 @@ export function DashboardVaccineCard(props: IDashboardVaccineCardProps) {
     { type: '猛禽', number: 1 },
     { type: '爬行动物', number: 2 },
   ];
+
+  const handleClickTitle = (keyword: string) => {
+    if (currentUser === 'admin') {
+      history.push({
+        pathname: '/vaccine',
+        query: {
+          keyword,
+        },
+      });
+    }
+  };
+  // 疫苗表页中
+  // const { location, dispatch } = this.props
+  // const { query, state } = location
+  // const PolicyId = query ? query.Id : undefined;
+  // const activeKey = state ? state.tabPane : "policyoption";
+
   return (
     <Card height={300} flexbox>
       <CardHeader title="疫苗接种总览" headerClassNames={['bg-success']} />
@@ -111,44 +124,55 @@ export function DashboardVaccineCard(props: IDashboardVaccineCardProps) {
       <CardBody>
         <CardRow>
           <div>
-            <Text type="gray" block>
-              总计
-            </Text>
-            <Text block>{52}</Text>
+            <Link to={currentUser === 'admin' ? '/info' : '#'}>
+              <Text type="gray" block>
+                总计
+              </Text>
+              <Text block underline>
+                52
+              </Text>
+            </Link>
           </div>
 
-          <div>
+          <div onClick={() => handleClickTitle('汪星人')}>
             <Text type="gray" block>
               汪星人
             </Text>
-            <Text block>{19}</Text>
+            {/* {dog} */}
+            <Text block underline>
+              19
+            </Text>
           </div>
-
-          <div>
+          <div onClick={() => handleClickTitle('喵星人')}>
             <Text type="gray" block>
               喵星人
             </Text>
-            <Text block>{28}</Text>
+            <Text block underline>
+              28
+            </Text>
           </div>
-          <div>
+          <div onClick={() => handleClickTitle('啮齿动物')}>
             <Text type="gray" block>
               啮齿动物
             </Text>
-            <Text block>{2}</Text>
+            <Text block underline>
+              2
+            </Text>
           </div>
-          <div>
+          <div onClick={() => handleClickTitle('猛禽')}>
             <Text type="gray" block>
               猛禽
             </Text>
-            <Text block>{1}</Text>
+            <Text block underline>
+              1
+            </Text>
           </div>
-          <div>
+          <div onClick={() => handleClickTitle('爬行动物')}>
             <Text type="gray" block>
               爬行动物
             </Text>
-            <Text block>
-              {2}
-              {/* {mice > 365 ? `365+` : mice} */}
+            <Text block underline>
+              2{/* {mice > 365 ? `365+` : mice} */}
             </Text>
           </div>
         </CardRow>

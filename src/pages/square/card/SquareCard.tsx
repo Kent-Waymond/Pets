@@ -1,33 +1,28 @@
 import React from 'react';
-import { connect, FormattedMessage } from 'umi';
-import { defineMessages, injectIntl, IntlShape } from 'react-intl';
+import { connect } from 'umi';
+import { injectIntl, IntlShape } from 'react-intl';
 import { IBHRawListDataRecord } from '@/type';
 import { SquareProfile, SquareRecord } from '../type';
-import {
-  CaretRightOutlined,
-  RedoOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { DeleteTwoTone, RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { SquareProfilePanel } from '../profile/SquareProfilePanel';
 import Button from '@/components/button';
 import NewCard, { CardBody } from '@/components/card';
-import { BasicTable, IColumnType } from '@/components/table/BasicTable';
-import Avatar from '@/components/avatar';
-import Grid, { NewRow } from '@/components/grid';
+import { NewRow } from '@/components/grid';
 import { Card, Col, Row } from 'antd';
-import Text from '@/components/text';
 import { stringSlice } from '@/utils/string';
-import Tag from '@/components/tag';
 import Space from '@/components/space';
 import { Drawer, Popconfirm } from 'antd';
 import CreateSquarePanel from '../form/CreateSquarePanel';
 import Pagination from '@/components/pagination';
 import { TABLE_PAGE_SIZE } from '@/variable';
+import { CommentRecord } from '@/pages/community/type.d';
 const { Meta } = Card;
 
 interface SquareCardProps {
   intl: IntlShape;
-  Square: IBHRawListDataRecord<SquareRecord>;
+  SquareProps: IBHRawListDataRecord<SquareRecord>;
+  CommentProps: IBHRawListDataRecord<CommentRecord>;
+
   SquareLoading: boolean;
   SquareModelLoading: boolean;
   dispatch: any;
@@ -35,6 +30,7 @@ interface SquareCardProps {
 
 interface SquareCardState {
   Squares: SquareRecord[];
+  Comments: CommentRecord[];
   SquaresCount: number;
 
   SquareProfile: SquareProfile | null;
@@ -58,6 +54,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
     super(props);
     this.state = {
       Squares: [],
+      Comments: [],
       SquaresCount: 0,
       SquareProfile: null,
 
@@ -71,20 +68,6 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
     };
   }
 
-  static getDerivedStateFromProps(
-    nextProps: SquareCardProps,
-    prevState: SquareCardState,
-  ) {
-    const { Square } = nextProps;
-    if (Square && Square['Squares'] instanceof Array) {
-      return {
-        Squares: Square['Squares'],
-        SquaresCount: Square.count,
-      };
-    }
-    return null;
-  }
-
   public onPageChange = (page: number, pageSize?: number, type?: string) => {
     this.setState(
       {
@@ -95,7 +78,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
         if (type === 'search') {
           this.SearchSquares();
         } else {
-          this.ListRecords();
+          this.ListSquareRecords();
         }
       },
     );
@@ -109,7 +92,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
         PageSize: TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListSquareRecords();
       },
     );
   };
@@ -155,12 +138,12 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
         CreateSquareVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListSquareRecords();
       },
     );
   };
 
-  public ListRecords = () => {
+  public ListSquareRecords = () => {
     const { Keyword, PageNumber, PageSize } = this.state;
     const { dispatch } = this.props;
 
@@ -191,7 +174,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
     dispatch({
       type: 'square/GetSquareProfile',
       payload: {
-        SquareId: record.essay_id,
+        SquareId: record.essayId,
       },
     }).then((profile: SquareProfile | null) => {
       if (profile) {
@@ -210,25 +193,40 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
         SquareProfileVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListSquareRecords();
       },
     );
   };
 
-  public Removesquare = (record: SquareRecord) => {
+  public Removesquare = (essayId: string) => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'square/RemoveSquares',
+      type: 'square/RemoveSquare',
       payload: {
-        Ids: [record?.essay_id],
+        essayId,
       },
     }).then(() => {
-      this.ListRecords();
+      this.ListSquareRecords();
     });
   };
 
+  static getDerivedStateFromProps(
+    nextProps: SquareCardProps,
+    prevState: SquareCardState,
+  ) {
+    const { SquareProps, CommentProps } = nextProps;
+    if (SquareProps && CommentProps) {
+      return {
+        Squares: SquareProps?.data,
+        SquaresCount: SquareProps.total,
+        Comments: CommentProps,
+      };
+    }
+    return null;
+  }
+
   componentDidMount() {
-    this.ListRecords();
+    this.ListSquareRecords();
   }
 
   render() {
@@ -236,6 +234,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
     const {
       Keyword,
       Squares,
+      Comments,
       SquaresCount,
       SquareProfile,
       PageNumber,
@@ -287,60 +286,53 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
           <CardBody>
             <div className="site-card-wrapper">
               <Row gutter={24}>
+                {Squares &&
+                  Squares.map((item: SquareRecord) => {
+                    return (
+                      <Col
+                        span={20}
+                        style={{ marginLeft: 60, marginBottom: 20 }}
+                        key={item?.essayId}
+                      >
+                        <Card
+                          title={item.title}
+                          extra={
+                            <Popconfirm
+                              placement="top"
+                              title="删除"
+                              onConfirm={() => this.Removesquare(item.essayId)}
+                              okText="确定"
+                              cancelText="取消"
+                            >
+                              <Button
+                                icon={<DeleteTwoTone twoToneColor="#eb2f96" />}
+                              />
+                            </Popconfirm>
+                          }
+                          hoverable
+                          bordered={true}
+                          // style={{ width: 200, height: 300 }}
+                          cover={
+                            <img
+                              alt="example"
+                              src={
+                                JSON.parse(item?.firstPicture).length
+                                  ? `http://${
+                                      JSON.parse(item?.firstPicture)[0]
+                                    }`
+                                  : 'http://119.3.249.45:7070/file/image/984165236451/2021-04-24-21-00-24-826default.png'
+                              }
+                              height="250"
+                            />
+                          }
+                        >
+                          <Meta description={stringSlice(item.essayContent)} />
+                        </Card>
+                      </Col>
+                    );
+                  })}
                 <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://i.loli.net/2021/03/11/DxuUI2VhK5RqBba.png"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta title="英短领养" description="自家产崽..." />
-                  </Card>
-                </Col>
-                <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://i.loli.net/2021/03/11/gExs7z9irBpcVjk.png"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta title="英短配对" description="纯种英短寻配偶..." />
-                  </Card>
-                </Col>
-                <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://i.loli.net/2021/03/11/FxB95vrtCLPTIZ2.png"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta title="寻物启事" description="猫咪走失...." />
-                  </Card>
-                </Col>
+                {/* 左右布局  或 上下布局  只能有一级评论  用List和Comment配合使用（Coment中只传入数据） */}
               </Row>
             </div>
           </CardBody>
@@ -363,6 +355,7 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
           destroyOnClose={true}
         >
           <SquareProfilePanel
+            Comments={Comments ?? null}
             profile={SquareProfile ?? null}
             visible={SquareProfileVisible}
             onClose={this.closeRecordProfile}
@@ -375,7 +368,8 @@ class SquareCard extends React.PureComponent<SquareCardProps, SquareCardState> {
 
 function mapStateToProps({ square, loading }: any) {
   return {
-    Square: square.Square,
+    SquareProps: square.Square,
+    CommentProps: square.Comments,
     SquareLoading: loading.effects['square/ListSquares'],
     SquareModelLoading: loading.models.Square,
   };

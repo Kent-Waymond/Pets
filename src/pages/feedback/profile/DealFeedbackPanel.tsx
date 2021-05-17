@@ -31,7 +31,7 @@ interface DealFeedbackPanelProps {
 }
 
 interface DealFeedbackPanelState {
-  Feedbacks: FeedbackRecord[];
+  FeedbacksToDeal: FeedbackRecord[];
   FeedbacksCount: number;
 
   FeedbackProfile: FeedbackProfile | null;
@@ -57,7 +57,7 @@ class DealFeedbackPanel extends React.PureComponent<
   constructor(props: DealFeedbackPanelProps) {
     super(props);
     this.state = {
-      Feedbacks: [],
+      FeedbacksToDeal: [],
       FeedbacksCount: 0,
       FeedbackProfile: null,
 
@@ -78,7 +78,7 @@ class DealFeedbackPanel extends React.PureComponent<
     const { Feedback } = nextProps;
     if (Feedback && Feedback['Feedbacks'] instanceof Array) {
       return {
-        Feedbacks: Feedback['Feedbacks'],
+        FeedbacksToDeal: Feedback['Feedbacks'],
         FeedbacksCount: Feedback.count,
       };
     }
@@ -92,7 +92,7 @@ class DealFeedbackPanel extends React.PureComponent<
         PageSize: pageSize ? pageSize : TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListFeedbacksToDeal();
       },
     );
   };
@@ -105,7 +105,7 @@ class DealFeedbackPanel extends React.PureComponent<
         PageSize: TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListFeedbacksToDeal();
       },
     );
   };
@@ -162,17 +162,17 @@ class DealFeedbackPanel extends React.PureComponent<
         CreateFeedbackVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListFeedbacksToDeal();
       },
     );
   };
 
-  public ListRecords = () => {
+  public ListFeedbacksToDeal = () => {
     const { Keyword, PageNumber, PageSize } = this.state;
     const { dispatch } = this.props;
 
     dispatch({
-      type: 'feedback/ListFeedbacks',
+      type: 'feedback/ListFeedbacksToDeal',
       payload: {
         Keyword,
         PageNumber,
@@ -205,7 +205,7 @@ class DealFeedbackPanel extends React.PureComponent<
         FeedbackProfileVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListFeedbacksToDeal();
       },
     );
   };
@@ -218,19 +218,19 @@ class DealFeedbackPanel extends React.PureComponent<
         Ids: [record?.complainId],
       },
     }).then(() => {
-      this.ListRecords();
+      this.ListFeedbacksToDeal();
     });
   };
-
+  public DealFeedbackSuccess = (Id: string) => {};
   componentDidMount() {
-    this.ListRecords();
+    this.ListFeedbacksToDeal();
   }
 
   render() {
     const { intl, FeedbackModelLoading } = this.props;
     const {
       Keyword,
-      Feedbacks,
+      FeedbacksToDeal,
       FeedbacksCount,
       FeedbackProfile,
       PageNumber,
@@ -245,6 +245,7 @@ class DealFeedbackPanel extends React.PureComponent<
             <div style={{ marginTop: 30, marginLeft: 20 }}>
               <NewRow size="md" flex justify="balance">
                 <Space>
+                  <h3>反馈处理</h3>
                   <div className="control search">
                     <input
                       type="text"
@@ -280,60 +281,47 @@ class DealFeedbackPanel extends React.PureComponent<
                 <div className="site-card-wrapper">
                   <Row gutter={24}>
                     <Col span={2}></Col>
-                    <Col span={8}>
-                      <Card
-                        title="投诉"
-                        bordered={true}
-                        hoverable
-                        style={{ width: 350, height: 550 }}
-                        cover={
-                          <img
-                            alt="example"
-                            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                            width="300"
-                            height="400"
-                          />
-                        }
-                        actions={[
-                          // TODO 加一个confirm
-                          <Button type="success">处理完成</Button>,
-                        ]}
-                      >
-                        <Meta
-                          title="xx不清理便便"
-                          description="8栋15层001住户...."
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={2}></Col>
-                    <Col span={8}>
-                      <Card
-                        title="建议"
-                        bordered={true}
-                        hoverable
-                        style={{ width: 350, height: 550 }}
-                        cover={
-                          <img
-                            alt="example"
-                            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                            width="300"
-                            height="400"
-                          />
-                        }
-                        actions={[
-                          <Button
-                            type="success"
-                            onClick={() => this.DealFeedback('id')}
-                          >
-                            处理完成
-                          </Button>,
-                        ]}
-                      >
-                        <Meta
-                          title="宠物喂养讲座"
-                          description="希望举办宠物喂养分享活动..."
-                        />
-                      </Card>
+                    <Col span={20}>
+                      {FeedbacksToDeal &&
+                        FeedbacksToDeal.map((item: FeedbackRecord) => {
+                          return (
+                            <Col
+                              span={20}
+                              style={{ marginLeft: 60, marginBottom: 20 }}
+                              key={item?.complainId}
+                            >
+                              <Card
+                                onClick={() => this.gotoRecordProfile(item)}
+                                title={item.title}
+                                extra={
+                                  <Popconfirm
+                                    placement="top"
+                                    title="处理完成"
+                                    onConfirm={() =>
+                                      this.DealFeedbackSuccess(item.complainId)
+                                    }
+                                    okText="确定"
+                                    cancelText="取消"
+                                  >
+                                    <Button type="success">处理完成</Button>
+                                  </Popconfirm>
+                                }
+                                hoverable
+                                bordered={true}
+                                // style={{ width: 200, height: 300 }}
+                                cover={
+                                  <img
+                                    alt="example"
+                                    src={`http://119.3.249.45:7070/file/image/${item.image}`}
+                                    height="250"
+                                  />
+                                }
+                              >
+                                <Meta description={stringSlice(item.content)} />
+                              </Card>
+                            </Col>
+                          );
+                        })}
                     </Col>
                     <Col span={2}></Col>
                   </Row>

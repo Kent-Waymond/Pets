@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppRouteComponentProps } from '@/type';
 import { Col, Row } from 'antd';
 import { PetsCard } from './card/PetsCard';
@@ -8,7 +8,7 @@ import { DashboardVaccineCard } from './card/DashboardVaccineCard';
 import Avatar from '@/components/avatar';
 import { NoticeCard } from './card/NoticeCard';
 import { useDispatch, useSelector } from 'umi';
-import moment from 'moment';
+import { formatStringTime } from '@/utils/date';
 
 // 刷新页面请求
 function refreshDashboardData(dispatch: any) {
@@ -36,6 +36,7 @@ export default function (props: AppRouteComponentProps) {
   let VaccinedCount: number = 0;
   let NeedVaccineCount: number = 0;
   let AllData: any;
+  let FreshTime: any = useRef();
 
   const AllDataForDashboard: any = useSelector(
     (state: any) => state.dashboard.AllDataForDashboard,
@@ -54,6 +55,7 @@ export default function (props: AppRouteComponentProps) {
     refreshDashboardData(dispatch);
     const Timer = setInterval(() => {
       intervalGetDashboardData(dispatch);
+      FreshTime.current = new Date();
     }, 60000);
     return () => {
       clearInterval(Timer);
@@ -92,6 +94,7 @@ export default function (props: AppRouteComponentProps) {
           refresh={refreshDashboardData}
         />
       </div>
+      <div>更新时间:{formatStringTime(FreshTime.current)}</div>
       <Row gutter={24} className="row-lg" style={{ marginTop: 20 }}>
         <Col span={3}></Col>
         <Col span={4}>

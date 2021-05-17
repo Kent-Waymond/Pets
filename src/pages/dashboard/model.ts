@@ -88,7 +88,6 @@ const Model: IDashboardModelType = {
       return;
     },
     *GetNoticeProfile({ payload: { noticeId } }, { call, put }) {
-      console.log(noticeId, 'model');
       const response = yield call(Service.GetNoticeProfile, { noticeId });
       const profile = response?.data?.data;
       yield put({

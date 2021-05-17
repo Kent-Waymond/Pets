@@ -3,11 +3,7 @@ import { connect, FormattedMessage } from 'umi';
 import { injectIntl, IntlShape } from 'react-intl';
 import { IBHRawListDataRecord } from '@/type';
 import { FeedbackProfile, FeedbackRecord } from '../type.d';
-import {
-  CaretRightOutlined,
-  RedoOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { DeleteTwoTone, RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import FeedbackProfilePanel from '../profile/FeedbackProfilePanel';
 import Button from '@/components/button';
 import NewCard, { CardBody } from '@/components/card';
@@ -24,7 +20,6 @@ import Pagination from '@/components/pagination';
 import { TABLE_PAGE_SIZE } from '@/variable';
 import DealFeedbackPanel from '../profile/DealFeedbackPanel';
 import { GET_IDENTITY } from '@/utils/auth';
-const currentUser = GET_IDENTITY();
 const { Meta } = Card;
 
 interface FeedbackCardProps {
@@ -59,6 +54,7 @@ class FeedbackCard extends React.PureComponent<
   FeedbackCardProps,
   FeedbackCardState
 > {
+  private currentUser = GET_IDENTITY();
   private TableColumns: IColumnType<FeedbackRecord>[];
   constructor(props: FeedbackCardProps) {
     super(props);
@@ -310,7 +306,7 @@ class FeedbackCard extends React.PureComponent<
     } = this.state;
     return (
       <>
-        {currentUser !== 'admin' ? (
+        {this.currentUser !== 'admin' ? (
           <>
             <div style={{ marginTop: 30, marginLeft: 20 }}>
               <NewRow size="md" flex justify="balance">
@@ -355,47 +351,33 @@ class FeedbackCard extends React.PureComponent<
                     <Col span={2}></Col>
                     <Col span={8}>
                       {/* TODO 根据返回的数据渲染Card */}
-                      <Card
-                        title="投诉"
-                        bordered={true}
-                        hoverable
-                        style={{ width: 350, height: 550 }}
-                        cover={
-                          <img
-                            alt="example"
-                            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                            width="300"
-                            height="400"
-                          />
-                        }
-                      >
-                        <Meta
-                          title="xx不清理便便"
-                          description="8栋15层001住户...."
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={2}></Col>
-                    <Col span={8}>
-                      <Card
-                        title="建议"
-                        bordered={true}
-                        hoverable
-                        style={{ width: 350, height: 550 }}
-                        cover={
-                          <img
-                            alt="example"
-                            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                            width="300"
-                            height="400"
-                          />
-                        }
-                      >
-                        <Meta
-                          title="宠物喂养讲座"
-                          description="希望举办宠物喂养分享活动..."
-                        />
-                      </Card>
+                      {Feedbacks &&
+                        Feedbacks.map((item: FeedbackRecord) => {
+                          return (
+                            <Col
+                              span={20}
+                              style={{ marginLeft: 60, marginBottom: 20 }}
+                              key={item?.complainId}
+                            >
+                              <Card
+                                onClick={() => this.gotoRecordProfile(item)}
+                                title={item.title}
+                                hoverable
+                                bordered={true}
+                                // style={{ width: 200, height: 300 }}
+                                cover={
+                                  <img
+                                    alt="example"
+                                    src={`http://119.3.249.45:7070/file/image/${item.image}`}
+                                    height="250"
+                                  />
+                                }
+                              >
+                                <Meta description={stringSlice(item.content)} />
+                              </Card>
+                            </Col>
+                          );
+                        })}
                     </Col>
                     <Col span={2}></Col>
                   </Row>
@@ -404,7 +386,7 @@ class FeedbackCard extends React.PureComponent<
             </NewCard>
 
             {/* TODO 住户才能发布反馈 */}
-            {CreateFeedbackVisible && (
+            {this.currentUser !== 'admin' && CreateFeedbackVisible && (
               <CreateFeedbackPanel
                 visible={CreateFeedbackVisible}
                 onClose={this.closeCreatePanel}
@@ -431,7 +413,7 @@ class FeedbackCard extends React.PureComponent<
         ) : (
           <></>
         )}
-        {currentUser === 'admin' ? (
+        {this.currentUser === 'admin' ? (
           <>
             <DealFeedbackPanel />
           </>

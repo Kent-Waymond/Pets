@@ -21,12 +21,13 @@ export interface ITextProps {
   block?: boolean;
   type?: TextType;
   size?: TextSize;
+  underline?: boolean;
   children?: React.ReactNode;
   title?: string;
 }
 
 export function Text(props: ITextProps) {
-  const { block, type, size, title, children } = props;
+  const { block, type, size, title, underline, children } = props;
 
   const computeTextClassnames = useMemo(() => {
     const classes: ComputeClassesType[] = [];
@@ -45,7 +46,10 @@ export function Text(props: ITextProps) {
     <span
       title={title}
       className={computeTextClassnames}
-      style={{ display: block ? 'block' : 'inline' }}
+      style={{
+        display: block ? 'block' : 'inline',
+        textDecoration: underline ? 'underline' : '',
+      }}
     >
       {children}
     </span>

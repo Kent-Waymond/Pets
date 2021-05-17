@@ -2,7 +2,7 @@ import React from 'react';
 import { Form, Input, Button } from 'antd';
 import { useIntl, defineMessages, useDispatch, useHistory } from 'umi';
 import { BasicForm } from '@/components-compatible/Form/BasicForm';
-import { SET_IDENTITY, GET_IDENTITY } from '@/utils/auth';
+import { SET_IDENTITY, GET_IDENTITY, SET_USER_TOKEN } from '@/utils/auth';
 
 export default function LoginIndex() {
   const [form] = Form.useForm();
@@ -40,9 +40,9 @@ export default function LoginIndex() {
       payload: {
         ...formvalues,
       },
-    }).then((pass: boolean) => {
-      if (pass) {
-        console.log(GET_IDENTITY(), 'home');
+    }).then((userId: string) => {
+      if (userId) {
+        SET_USER_TOKEN(userId);
         history.push('/');
         // window.location.reload()
       } else {

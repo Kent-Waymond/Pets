@@ -3,7 +3,6 @@ import classNames from 'classnames';
 
 export interface IColProps {
   children?: React.ReactNode;
-  // TODO:确认grid属性名称
   grid?: boolean;
 }
 export function NewCol(props: IColProps) {

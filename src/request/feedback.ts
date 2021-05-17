@@ -38,6 +38,10 @@ export function ModifyFeedback({
 export function ListFeedbacks({ pageNumber, pageSize }: any) {
   return axios.appPost(`/admin/complainList/${pageNumber}/${pageSize}`);
 }
+// ListFeedbacksToDeal
+export function ListFeedbacksToDeal({ pageNumber, pageSize }: any) {
+  return axios.appPost(`/admin/complainList/${pageNumber}/${pageSize}`);
+}
 // GetFeedback
 export function GetFeedback({ FeedbackId }: any) {
   return axios.appPost(`/article/detailComplain/${FeedbackId}`);

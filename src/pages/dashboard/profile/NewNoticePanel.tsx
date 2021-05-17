@@ -4,6 +4,7 @@ import { DrawerProps } from 'antd/lib/drawer';
 import { useDispatch } from 'umi';
 import { BasicForm } from '@/components-compatible/Form/BasicForm';
 import { InboxOutlined } from '@ant-design/icons';
+import { GET_USER_TOKEN } from '@/utils/auth';
 const { Option } = Select;
 const { Dragger } = Upload;
 const FormItem = Form.Item;
@@ -15,6 +16,7 @@ interface INewNoticePanelProps extends DrawerProps {
 
 function NewNoticePanel(props: INewNoticePanelProps): any {
   const { visible, onClose } = props;
+  const CurrentUserID = GET_USER_TOKEN();
   const dispatch = useDispatch<any>();
   const [AddFeedbackLoading, ChangeAddFeedbackLoaidng] = useState<boolean>(
     false,
@@ -39,15 +41,19 @@ function NewNoticePanel(props: INewNoticePanelProps): any {
 
   async function onFormFinish(formvalues: any) {
     ChangeAddFeedbackLoaidng(true);
-    // TODO 提交editor  一起作为参数传过去
+    let ImageLink: string = '';
+    if (ImageUrl) {
+      ImageLink = '119.3.249.45:7070/file/image/' + ImageUrl;
+    }
 
     const id = await dispatch({
       type: 'dashboard/CreateNotice',
       payload: {
         title: formvalues?.title || '',
         noticeType: formvalues?.noticeType,
-        // 把图片插入到content中即可
-        content: formvalues?.content || '',
+        content: ImageLink
+          ? formvalues?.content + ImageLink
+          : formvalues?.content,
       },
     });
 
@@ -60,18 +66,19 @@ function NewNoticePanel(props: INewNoticePanelProps): any {
   const ImageProps = {
     name: 'name',
     multiple: true,
-    action:
-      'http://119.3.249.45:7070/file/upload/60ecf97c-c157-4201-8e7d-e2bf896d3119',
+    action: `http://119.3.249.45:7070/file/upload/${CurrentUserID}`,
     // headers: {
     //   'Content-Type': 'application/octet-stream',
     // },
     onChange(info: any) {
       const { status } = info.file;
       if (status !== 'uploading') {
-        console.log(info.file, info.fileList);
+        // console.log(, info.fileList);
       }
       if (status === 'done') {
         message.success(`${info.file.name}上传成功`);
+        console.log(info, 'info');
+        changeImageUrl(info.file.response.data);
       } else if (status === 'error') {
         message.error(`${info.file.name}上传失败`);
       }

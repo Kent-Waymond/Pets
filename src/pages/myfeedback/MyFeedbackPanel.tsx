@@ -35,7 +35,7 @@ interface MyFeedbackPanelState {
   PageNumber: number;
   PageSize: number;
 
-  FeedbackProfileVisible: boolean;
+  myFeedbackProfileVisible: boolean;
   CreateFeedbackVisible: boolean;
 }
 
@@ -62,7 +62,7 @@ class MyFeedbackPanel extends React.PureComponent<
       PageNumber: 1,
       PageSize: TABLE_PAGE_SIZE,
 
-      FeedbackProfileVisible: false,
+      myFeedbackProfileVisible: false,
       CreateFeedbackVisible: false,
     };
 
@@ -157,7 +157,7 @@ class MyFeedbackPanel extends React.PureComponent<
         PageSize: pageSize ? pageSize : TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListMyFeedbackRecords();
       },
     );
   };
@@ -170,7 +170,7 @@ class MyFeedbackPanel extends React.PureComponent<
         PageSize: TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListMyFeedbackRecords();
       },
     );
   };
@@ -205,12 +205,6 @@ class MyFeedbackPanel extends React.PureComponent<
     );
   };
 
-  public ReuploadProof = (FeedbackId: string) => {
-    // 打开上传页，传入参数和图片即可
-  };
-
-  public UploadProof = (FeedbackId: string) => {};
-
   public openCreatePanel = () => {
     this.setState({
       CreateFeedbackVisible: true,
@@ -222,12 +216,12 @@ class MyFeedbackPanel extends React.PureComponent<
         CreateFeedbackVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListMyFeedbackRecords();
       },
     );
   };
 
-  public ListRecords = () => {
+  public ListMyFeedbackRecords = () => {
     const { Keyword, PageNumber, PageSize } = this.state;
     const { dispatch } = this.props;
 
@@ -252,7 +246,7 @@ class MyFeedbackPanel extends React.PureComponent<
       if (profile) {
         this.setState({
           FeedbackProfile: profile,
-          FeedbackProfileVisible: true,
+          myFeedbackProfileVisible: true,
         });
       }
     });
@@ -262,10 +256,10 @@ class MyFeedbackPanel extends React.PureComponent<
     this.setState(
       {
         FeedbackProfile: null,
-        FeedbackProfileVisible: false,
+        myFeedbackProfileVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListMyFeedbackRecords();
       },
     );
   };
@@ -278,12 +272,12 @@ class MyFeedbackPanel extends React.PureComponent<
         complainId: record?.complainId,
       },
     }).then(() => {
-      this.ListRecords();
+      this.ListMyFeedbackRecords();
     });
   };
 
   componentDidMount() {
-    this.ListRecords();
+    this.ListMyFeedbackRecords();
   }
 
   render() {
@@ -295,8 +289,7 @@ class MyFeedbackPanel extends React.PureComponent<
       FeedbackProfile,
       PageNumber,
       PageSize,
-      FeedbackProfileVisible,
-      CreateFeedbackVisible,
+      myFeedbackProfileVisible,
     } = this.state;
     return (
       <>
@@ -308,29 +301,38 @@ class MyFeedbackPanel extends React.PureComponent<
               <CardBody>
                 <div className="site-card-wrapper">
                   <Row gutter={24}>
-                    <Col span={2}></Col>
-                    <Col span={20}>
-                      {/* TODO 根据返回的数据渲染Card */}
-                      <Card
-                        title="投诉"
-                        bordered={true}
-                        hoverable
-                        style={{ width: 350, height: 550 }}
-                        cover={
-                          <img
-                            alt="example"
-                            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                            width="300"
-                            height="400"
-                          />
-                        }
-                      >
-                        <Meta
-                          title="xx不清理便便"
-                          description="8栋15层001住户...."
-                        />
-                      </Card>
-                    </Col>
+                    {Feedbacks &&
+                      Feedbacks.map((item: FeedbackRecord) => {
+                        return (
+                          <Col
+                            span={20}
+                            style={{ marginLeft: 60, marginBottom: 20 }}
+                            key={item?.complainId}
+                          >
+                            <Card
+                              title={`${item.title}  -- ${item?.complainType}`}
+                              onClick={() => this.gotoRecordProfile(item)}
+                              // extra={
+                              //   <Popconfirm placement="top" title="删除" onConfirm={() => this.RemoveMoment(item.complainId)} okText="确定" cancelText="取消">
+                              //     <Button icon={<DeleteTwoTone twoToneColor="#eb2f96" />} />
+                              //   </Popconfirm>
+                              // }
+                              hoverable
+                              bordered={true}
+                              // style={{ width: 200, height: 300 }}
+                              cover={
+                                <img
+                                  alt="example"
+                                  src={`http://119.3.249.45:7070/file/image/${item?.image}`}
+                                  height="250"
+                                />
+                              }
+                            >
+                              <Meta description={stringSlice(item.content)} />
+                            </Card>
+                          </Col>
+                        );
+                      })}
                     <Col span={2}></Col>
                   </Row>
                 </div>
@@ -339,7 +341,7 @@ class MyFeedbackPanel extends React.PureComponent<
 
             <Drawer
               title="反馈详情"
-              visible={FeedbackProfileVisible}
+              visible={myFeedbackProfileVisible}
               // visible={true}
               width={850}
               onClose={this.closeRecordProfile}
@@ -348,7 +350,7 @@ class MyFeedbackPanel extends React.PureComponent<
               {/* TODO 若反馈已在处理阶段  不能进行修改 */}
               <FeedbackProfilePanel
                 profile={FeedbackProfile ?? null}
-                visible={FeedbackProfileVisible}
+                visible={myFeedbackProfileVisible}
                 onClose={this.closeRecordProfile}
               />
             </Drawer>

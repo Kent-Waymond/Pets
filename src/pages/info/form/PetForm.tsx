@@ -4,6 +4,7 @@ import { Form, Select, Radio, Upload, message } from 'antd';
 import { Input, InputNumber } from 'antd';
 import { PetProfile } from '../type.d';
 import { InboxOutlined } from '@ant-design/icons';
+import { GET_USER_TOKEN } from '@/utils/auth';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -16,13 +17,14 @@ interface IPetFormProps {
 }
 const FormItem = Form.Item;
 export function PetForm(props: IPetFormProps) {
+  const CurrentUserID = GET_USER_TOKEN();
+
   const { type, PetProfile, form, onFormFinish } = props;
 
   const ImageProps = {
     name: 'name',
     multiple: true,
-    action:
-      'http://119.3.249.45:7070/file/upload/60ecf97c-c157-4201-8e7d-e2bf896d3119',
+    action: `http://119.3.249.45:7070/file/upload/${CurrentUserID}`,
     // headers: {
     //   'Content-Type': 'application/octet-stream',
     // },

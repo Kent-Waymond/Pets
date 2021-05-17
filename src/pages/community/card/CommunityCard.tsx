@@ -1,33 +1,27 @@
 import React from 'react';
-import { connect, FormattedMessage } from 'umi';
-import { defineMessages, injectIntl, IntlShape } from 'react-intl';
+import { connect } from 'umi';
+import { injectIntl, IntlShape } from 'react-intl';
 import { IBHRawListDataRecord } from '@/type';
-import { CommunityProfile, CommunityRecord } from '../type';
-import {
-  CaretRightOutlined,
-  RedoOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { CommunityProfile, CommunityRecord, CommentRecord } from '../type';
+import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { CommunityProfilePanel } from '../profile/CommunityProfilePanel';
 import Button from '@/components/button';
 import NewCard, { CardBody } from '@/components/card';
-import { BasicTable, IColumnType } from '@/components/table/BasicTable';
-import Avatar from '@/components/avatar';
-import Grid, { NewRow } from '@/components/grid';
+import { NewRow } from '@/components/grid';
 import { Card, Col, Row } from 'antd';
-import Text from '@/components/text';
-import { stringSlice } from '@/utils/string';
-import Tag from '@/components/tag';
 import Space from '@/components/space';
 import { Drawer, Popconfirm } from 'antd';
 import CreateCommunityPanel from '../form/CreateCommunityPanel';
 import Pagination from '@/components/pagination';
 import { TABLE_PAGE_SIZE } from '@/variable';
+import { stringSlice } from '@/utils/string';
+import { DeleteTwoTone } from '@ant-design/icons';
 const { Meta } = Card;
 
 interface CommunityCardProps {
   intl: IntlShape;
-  Community: IBHRawListDataRecord<CommunityRecord>;
+  CommunityProps: IBHRawListDataRecord<CommunityRecord>;
+  CommentProps: IBHRawListDataRecord<CommentRecord>;
   CommunityLoading: boolean;
   CommunityModelLoading: boolean;
   dispatch: any;
@@ -35,6 +29,7 @@ interface CommunityCardProps {
 
 interface CommunityCardState {
   Communitys: CommunityRecord[];
+  Comments: CommentRecord[];
   CommunitysCount: number;
 
   CommunityProfile: CommunityProfile | null;
@@ -61,6 +56,7 @@ class CommunityCard extends React.PureComponent<
     super(props);
     this.state = {
       Communitys: [],
+      Comments: [],
       CommunitysCount: 0,
       CommunityProfile: null,
 
@@ -74,20 +70,6 @@ class CommunityCard extends React.PureComponent<
     };
   }
 
-  static getDerivedStateFromProps(
-    nextProps: CommunityCardProps,
-    prevState: CommunityCardState,
-  ) {
-    const { Community } = nextProps;
-    if (Community && Community['Communitys'] instanceof Array) {
-      return {
-        Communitys: Community['Communitys'],
-        CommunitysCount: Community.count,
-      };
-    }
-    return null;
-  }
-
   public onPageChange = (page: number, pageSize?: number, type?: string) => {
     this.setState(
       {
@@ -98,7 +80,7 @@ class CommunityCard extends React.PureComponent<
         if (type === 'search') {
           this.SearchCommunitys();
         } else {
-          this.ListRecords();
+          this.ListCommunityRecords();
         }
       },
     );
@@ -112,7 +94,7 @@ class CommunityCard extends React.PureComponent<
         PageSize: TABLE_PAGE_SIZE,
       },
       () => {
-        this.ListRecords();
+        this.ListCommunityRecords();
       },
     );
   };
@@ -141,7 +123,7 @@ class CommunityCard extends React.PureComponent<
       },
       () => {
         if (value == '') {
-          this.resetPageInfo();
+          this.resetPageInfo('');
         }
       },
     );
@@ -152,18 +134,18 @@ class CommunityCard extends React.PureComponent<
       CreateCommunityVisible: true,
     });
   };
-  public closeCreatePanel = () => {
+  public CloseCreatePanel = () => {
     this.setState(
       {
         CreateCommunityVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListCommunityRecords();
       },
     );
   };
 
-  public ListRecords = () => {
+  public ListCommunityRecords = () => {
     const { Keyword, PageNumber, PageSize } = this.state;
     const { dispatch } = this.props;
 
@@ -196,7 +178,7 @@ class CommunityCard extends React.PureComponent<
     dispatch({
       type: 'community/GetCommunityProfile',
       payload: {
-        CommunityId: record.essay_id,
+        CommunityId: record.essayId,
       },
     }).then((profile: CommunityProfile | null) => {
       if (profile) {
@@ -215,25 +197,41 @@ class CommunityCard extends React.PureComponent<
         CommunityProfileVisible: false,
       },
       () => {
-        this.ListRecords();
+        this.ListCommunityRecords();
       },
     );
   };
 
-  public Removecommunity = (record: CommunityRecord) => {
+  public Removecommunity = (essayId: string) => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'community/RemoveCommunitys',
+      type: 'community/RemoveCommunity',
       payload: {
-        Ids: [record?.essay_id],
+        essayId: essayId,
       },
     }).then(() => {
-      this.ListRecords();
+      this.ListCommunityRecords();
     });
   };
 
+  static getDerivedStateFromProps(
+    nextProps: CommunityCardProps,
+    prevState: CommunityCardState,
+  ) {
+    const { CommunityProps, CommentProps } = nextProps;
+
+    if (CommunityProps && CommentProps) {
+      return {
+        Communitys: CommunityProps?.data,
+        CommunitysCount: CommunityProps?.total,
+        Comments: CommentProps,
+      };
+    }
+    return null;
+  }
+
   componentDidMount() {
-    this.ListRecords();
+    this.ListCommunityRecords();
   }
 
   render() {
@@ -241,6 +239,7 @@ class CommunityCard extends React.PureComponent<
     const {
       Keyword,
       Communitys,
+      Comments,
       CommunitysCount,
       CommunityProfile,
       PageNumber,
@@ -248,6 +247,7 @@ class CommunityCard extends React.PureComponent<
       CommunityProfileVisible,
       CreateCommunityVisible,
     } = this.state;
+
     return (
       <>
         <div style={{ marginTop: 30, marginLeft: 20, minWidth: 800 }}>
@@ -292,68 +292,57 @@ class CommunityCard extends React.PureComponent<
           <CardBody>
             <div className="site-card-wrapper">
               <Row gutter={24}>
+                {Communitys &&
+                  Communitys.map((item: CommunityRecord) => {
+                    return (
+                      <Col
+                        span={20}
+                        style={{ marginLeft: 60, marginBottom: 20 }}
+                        key={item?.essayId}
+                      >
+                        <Card
+                          onClick={() => this.gotoRecordProfile(item)}
+                          title={item.title}
+                          extra={
+                            <Popconfirm
+                              placement="top"
+                              title="删除"
+                              onConfirm={() =>
+                                this.Removecommunity(item.essayId)
+                              }
+                              okText="确定"
+                              cancelText="取消"
+                            >
+                              <Button
+                                icon={<DeleteTwoTone twoToneColor="#eb2f96" />}
+                              />
+                            </Popconfirm>
+                          }
+                          hoverable
+                          bordered={true}
+                          // style={{ width: 200, height: 300 }}
+                          cover={
+                            <img
+                              alt="example"
+                              src={
+                                JSON.parse(item?.firstPicture).length
+                                  ? `http://${
+                                      JSON.parse(item?.firstPicture)[0]
+                                    }`
+                                  : 'http://119.3.249.45:7070/file/image/984165236451/2021-04-24-21-00-24-826default.png'
+                              }
+                              height="250"
+                            />
+                          }
+                        >
+                          <Meta description={stringSlice(item.essayContent)} />
+                        </Card>
+                      </Col>
+                    );
+                  })}
                 <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://tiebapic.baidu.com/forum/pic/item/7aec54e736d12f2e96d9a72e58c2d5628435689b.jpg"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta title="大橘寄养" description="公司出差..." />
-                  </Card>
-                </Col>
-                <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://tiebapic.baidu.com/forum/pic/item/08f790529822720ee013ebb46ccb0a46f31fab9b.jpg"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta
-                      title="宠物医院推荐"
-                      description="证书齐全、细致..."
-                    />
-                  </Card>
-                </Col>
-                <Col span={2}></Col>
-                <Col span={5}>
-                  <Card
-                    hoverable
-                    bordered={true}
-                    style={{ width: 200, height: 300 }}
-                    cover={
-                      <img
-                        alt="example"
-                        src="https://tiebapic.baidu.com/forum/pic/item/b7fd5266d016092420f9ab55c30735fae7cd349b.jpg"
-                        width="200"
-                        height="250"
-                      />
-                    }
-                  >
-                    <Meta
-                      title="猫粮推荐"
-                      description="xxx性价比高，猫咪十分喜欢..."
-                    />
-                  </Card>
 
-                  {/* 左右布局  或 上下布局  只能有一级评论  用List和Comment配合使用（Coment中只传入数据） */}
-                </Col>
+                {/* 左右布局  或 上下布局  只能有一级评论  用List和Comment配合使用（Coment中只传入数据） */}
               </Row>
             </div>
           </CardBody>
@@ -362,7 +351,7 @@ class CommunityCard extends React.PureComponent<
         {CreateCommunityVisible && (
           <CreateCommunityPanel
             visible={CreateCommunityVisible}
-            onClose={this.closeCreatePanel}
+            onClose={this.CloseCreatePanel}
             // width={800}
           />
         )}
@@ -376,6 +365,7 @@ class CommunityCard extends React.PureComponent<
           destroyOnClose={true}
         >
           <CommunityProfilePanel
+            Comments={Comments ?? null}
             profile={CommunityProfile ?? null}
             visible={CommunityProfileVisible}
             onClose={this.closeRecordProfile}
@@ -388,7 +378,8 @@ class CommunityCard extends React.PureComponent<
 
 function mapStateToProps({ community, loading }: any) {
   return {
-    Community: community.Community,
+    CommunityProps: community.Community,
+    CommentProps: community.Comments,
     CommunityLoading: loading.effects['community/ListCommunitys'],
     CommunityModelLoading: loading.models.Community,
   };

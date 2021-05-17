@@ -14,12 +14,11 @@ export interface INoticeCardProps {
   refresh: (dispatch: any) => void;
 }
 const contentStyle: any = {
-  height: '300px',
+  height: '400px',
   color: '#fff',
-  lineHeight: '300px',
+  lineHeight: '400px',
   textAlign: 'center',
   margin: '0 auto',
-  background: '#AFEAAA',
 };
 export function NoticeCard(props: INoticeCardProps) {
   const currentUser = GET_IDENTITY();
@@ -77,7 +76,7 @@ export function NoticeCard(props: INoticeCardProps) {
             {records &&
               records.map((record: INoticeRecord) => {
                 return (
-                  <div>
+                  <>
                     <Link
                       onClick={() => OpenNoticeProfilePanel(record?.noticeId)}
                       style={{ color: '#39BAE8' }}
@@ -85,25 +84,16 @@ export function NoticeCard(props: INoticeCardProps) {
                       公告名称：{record?.title}
                     </Link>
                     <br />
-                    <Image
-                      // width={1200}
-                      height={100}
-                      src={record.firstPicture}
-                      // src={`http://119.3.249.45:7070/file/image/${record.firstPicture}`}
-                    />
-                  </div>
+                    <div style={contentStyle}>
+                      <Image
+                        placeholder={true}
+                        height={400}
+                        src={`http://${record.firstPicture}`}
+                      />
+                    </div>
+                  </>
                 );
               })}
-            {/* 
-            <div>
-              <div style={contentStyle}>2</div>
-            </div>
-            <div>
-              <div style={contentStyle}>3</div>
-            </div>
-            <div>
-              <div style={contentStyle}>4</div>
-            </div> */}
           </Carousel>
         </CardBody>
       </Card>

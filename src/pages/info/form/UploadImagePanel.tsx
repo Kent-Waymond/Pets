@@ -6,6 +6,7 @@ import { BasicForm } from '@/components-compatible/Form/BasicForm';
 import { BasicFormItem } from '@/components-compatible/Form/BasicForm';
 import axios from '@/request/basicRequest';
 import { InboxOutlined } from '@ant-design/icons';
+import { GET_USER_TOKEN } from '@/utils/auth';
 
 const { Dragger } = Upload;
 interface IUploadImagePanelProps extends DrawerProps {
@@ -15,6 +16,7 @@ interface IUploadImagePanelProps extends DrawerProps {
 
 function UploadImagePanel(props: IUploadImagePanelProps): any {
   const { visible, onClose } = props;
+  const CurrentUserID = GET_USER_TOKEN();
 
   const dispatch = useDispatch<any>();
   const [createLoading, ChangeCreateLoaidng] = useState<boolean>(false);
@@ -23,8 +25,7 @@ function UploadImagePanel(props: IUploadImagePanelProps): any {
   const ImageProps = {
     name: 'name',
     multiple: true,
-    action:
-      'http://119.3.249.45:7070/file/upload/60ecf97c-c157-4201-8e7d-e2bf896d3119',
+    action: `http://119.3.249.45:7070/file/upload/${CurrentUserID}`,
     // headers: {
     //   'Content-Type': 'application/octet-stream',
     // },

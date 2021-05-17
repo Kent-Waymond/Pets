@@ -89,9 +89,12 @@ const Model: IModelType = {
         return response?.data?.data?.total;
       }
     },
-    *SearchVaccines({ payload: { Keyword } }, { call, put }) {
+
+    *SearchVaccines({ payload: { Keyword, species } }, { call, put }) {
+      alert(1);
       const response = yield call(Service.SearchVaccine, {
         Keyword,
+        species,
       });
 
       yield put({

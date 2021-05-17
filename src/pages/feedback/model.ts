@@ -14,6 +14,7 @@ interface IModelType {
 
 interface IModelStates {
   Feedback: IBHRawListDataRecord<FeedbackRecord> | null;
+  FeedbacksToDeal: IBHRawListDataRecord<FeedbackRecord> | null;
   FeedbackProfile: FeedbackProfile | null;
   MyFeedback: IBHRawListDataRecord<FeedbackRecord> | null;
   MyFeedbackProfile: FeedbackProfile | null;
@@ -21,9 +22,11 @@ interface IModelStates {
 interface IModelReducers {
   updateFeedbackRecord: Reducer<IModelStates, any>;
   updateMyFeedbackRecord: Reducer<IModelStates, any>;
+  updateFeedbacksToDeal: Reducer<IModelStates, any>;
 }
 interface IModelEffects {
   ListFeedbacks: Effect;
+  ListFeedbacksToDeal: Effect;
   GetFeedback: Effect;
   ListMyFeedbacks: Effect;
   GetMyFeedback: Effect;
@@ -37,6 +40,7 @@ const Model: IModelType = {
   namespace: 'feedback',
   state: {
     Feedback: null,
+    FeedbacksToDeal: null,
     FeedbackProfile: null,
     MyFeedback: null,
     MyFeedbackProfile: null,
@@ -59,6 +63,13 @@ const Model: IModelType = {
         MyFeedback,
       };
     },
+    updateFeedbacksToDeal: (state: IModelStates, { payload }): IModelStates => {
+      const { FeedbacksToDeal } = payload;
+      return {
+        ...state,
+        FeedbacksToDeal,
+      };
+    },
   },
   effects: {
     *ListFeedbacks(
@@ -75,6 +86,23 @@ const Model: IModelType = {
         type: 'updateFeedbackRecord',
         payload: {
           Feedback: response?.data?.data || null,
+        },
+      });
+    },
+    *ListFeedbacksToDeal(
+      { payload: { Keyword, PageNumber, PageSize } },
+      { call, put },
+    ) {
+      const response = yield call(Service.ListFeedbacksToDeal, {
+        Keyword,
+        PageNumber,
+        PageSize,
+      });
+
+      yield put({
+        type: 'updateFeedbacksToDeal',
+        payload: {
+          FeedbacksToDeal: response?.data?.data || null,
         },
       });
     },

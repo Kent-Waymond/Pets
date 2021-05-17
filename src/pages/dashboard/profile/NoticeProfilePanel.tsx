@@ -21,21 +21,26 @@ interface INoticeProfilePanelProps extends DrawerProps {
 export default function NoticeProfilePanel(props: INoticeProfilePanelProps) {
   const { visible, profile, refresh, currentUser, onClose } = props;
   const dispatch = useDispatch<any>();
-
+  const [ImageUrl, ChangeImageUrl] = useState('');
+  const [Content, ChangeContent] = useState('');
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (profile) {
+      const ImageArr: string[] = profile?.content?.split('119.3.249.45:7070');
+      if (ImageArr?.length) {
+        ChangeContent(ImageArr[0]);
+        ChangeImageUrl('http://119.3.249.45:7070' + ImageArr[1]);
+      }
       form.setFieldsValue({
         // TODO 详情赋值
         title: profile?.title,
         noticeType: profile?.noticeType,
-        content: profile?.content,
-        name: profile?.firstPicture,
+        content: Content,
         publishTime: formatStringTime(profile?.createTime),
       });
     }
-  }, [form, profile]);
+  }, [form, Content, profile]);
 
   function handleDrawerClose(ev: any) {
     if (onClose) {
@@ -65,6 +70,7 @@ export default function NoticeProfilePanel(props: INoticeProfilePanelProps) {
       删除
     </Button>
   );
+
   return (
     <Drawer
       title="公告详情"
@@ -81,14 +87,14 @@ export default function NoticeProfilePanel(props: INoticeProfilePanelProps) {
         // onValuesChange={onValuesChange}
       >
         <FormItem label="公告标题" name="title" initialValue="">
-          <Input disabled />
+          <Input readOnly />
         </FormItem>
         <FormItem label="发布时间" name="publishTime" initialValue={''}>
-          <Input disabled />
+          <Input readOnly />
         </FormItem>
 
         <FormItem label="公告类型" name="noticeType" initialValue="">
-          <Select disabled>
+          <Select>
             <Option value="1">法律法规</Option>
             <Option value="2">饲养手册</Option>
             <Option value="3">公益宣传</Option>
@@ -99,13 +105,13 @@ export default function NoticeProfilePanel(props: INoticeProfilePanelProps) {
         <FormItem label="图片" name="name" initialValue="">
           <Image
             // width={1200}
-            height={100}
+            height={300}
             // src={profile?.firstPicture}
-            // src={`http://119.3.249.45:7070/file/image/${record.firstPicture}`}
+            src={ImageUrl}
           />
         </FormItem>
         <FormItem label="公告内容" name="content" initialValue={''}>
-          <Input.TextArea disabled />
+          <Input.TextArea readOnly />
         </FormItem>
       </BasicForm>
     </Drawer>

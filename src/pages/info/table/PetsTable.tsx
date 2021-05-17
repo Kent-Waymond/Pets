@@ -7,26 +7,25 @@ import {
   CaretRightOutlined,
 } from '@ant-design/icons';
 import { injectIntl, IntlShape } from 'react-intl';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import { IBHRawListDataRecord } from '@/type';
 import { PetRecord, UserRecord, UserProfile, PetProfile } from '../type.d';
 import UploadLicensePanel from '@/pages/vaccine/form/UploadLicensePanel';
 import CreatePetPanel from '../form/CreatePetPanel';
 import Button from '@/components/button';
-import Avatar from '@/components/avatar';
 import Grid, { NewRow } from '@/components/grid';
 import Text from '@/components/text';
 import { stringSlice } from '@/utils/string';
-import Tag from '@/components/tag';
 import Space from '@/components/space';
 import NewCard, { CardBody, CardHeader } from '@/components/card';
 import { BasicTable, IColumnType } from '@/components/table/BasicTable';
-import { Popconfirm } from 'antd';
+import { Popconfirm, Select } from 'antd';
 import Pagination from '@/components/pagination';
 import { TABLE_PAGE_SIZE } from '@/variable';
 import { GET_IDENTITY } from '@/utils/auth';
 import PetProfilePanel from '../profile/PetProfilePanel';
 
+const { Option } = Select;
 interface IPetsTableProps {
   PetRecord: IBHRawListDataRecord<PetRecord>;
   PetsLoading: boolean;
@@ -35,22 +34,20 @@ interface IPetsTableProps {
   dispatch: any;
   intl: IntlShape;
   type: 'vaccine' | 'admin' | 'petMaster';
+  SearchKeyword: string;
 }
 
 interface IPetsTableStates {
   PetCount: number;
   PetRecords: PetRecord[];
-  UserCount: number;
   UserRecords: UserRecord[];
 
-  CreateUserVisible: boolean;
-  UserProfileVisible: boolean;
-  UserProfileId: string;
   VaccineId: string;
 
   AddPetVisible: boolean;
   PetProfileVisible: boolean;
   PetProfileId: string;
+  PetProfile: any;
   UploadLicenseVisible: boolean;
 
   Keyword: string;
@@ -71,17 +68,14 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
     this.state = {
       PetCount: 0,
       PetRecords: [],
-      UserCount: 0,
       UserRecords: [],
 
-      CreateUserVisible: false,
-      UserProfileVisible: false,
-      UserProfileId: '',
       VaccineId: '',
 
       AddPetVisible: false,
       PetProfileVisible: false,
       PetProfileId: '',
+      PetProfile: '',
       UploadLicenseVisible: false,
 
       Keyword: '',
@@ -203,7 +197,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
     if (PetRecord) {
       return {
         PetRecords: PetRecord,
-        PetsCount: PetRecord.length,
+        PetCount: PetRecord.length,
       };
     }
     return null;
@@ -214,9 +208,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
     this.resetPageInfo();
   };
 
-  public handleChange = (ev: any) => {
-    const value = ev.target.value;
-
+  public handleSelect = (value: string) => {
     this.setState(
       {
         Keyword: value,
@@ -224,9 +216,23 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
       () => {
         if (value == '') {
           this.resetPageInfo();
+        } else {
+          this.SearchPetRecords();
         }
       },
     );
+  };
+
+  public SearchPetRecords = (keyword?: string) => {
+    const { Keyword } = this.state;
+    const { dispatch } = this.props;
+    console.log(keyword, 'keyword111');
+    dispatch({
+      type: 'info/SearchPetRecords',
+      payload: {
+        species: keyword ?? Keyword,
+      },
+    });
   };
 
   public onKeyDownchange = (e: any) => {
@@ -264,22 +270,6 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
     );
   };
 
-  public openCreateUserPanel = () => {
-    this.setState({
-      CreateUserVisible: true,
-    });
-  };
-
-  public closeCreatePanel = () => {
-    this.setState(
-      {
-        CreateUserVisible: false,
-      },
-      () => {
-        // this.ListPetRecords();
-      },
-    );
-  };
   public openAddPetPanel = () => {
     this.setState({
       AddPetVisible: true,
@@ -299,7 +289,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
   public closeUpdatePetPanel = () => {
     this.setState(
       {
-        UserProfileVisible: false,
+        PetProfileVisible: false,
       },
       () => {
         this.ListPetRecords();
@@ -308,10 +298,33 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
   };
 
   public OpenPetProfile = (id: string) => {
+    const { dispatch } = this.props;
     this.setState({
-      UserProfileVisible: true,
-      UserProfileId: id,
+      PetProfileVisible: true,
+      PetProfileId: id,
     });
+    dispatch({
+      type: 'info/GetPetProfile',
+      payload: {
+        petId: id,
+      },
+    }).then((profile: any) => {
+      this.setState({
+        PetProfile: profile,
+      });
+    });
+  };
+
+  public ClosePetProfile = () => {
+    this.setState(
+      {
+        PetProfileVisible: false,
+        PetProfileId: '',
+      },
+      () => {
+        this.ListPetRecords();
+      },
+    );
   };
 
   public UploadVaccineLicense = (record: any) => {
@@ -325,17 +338,6 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
 
   public ReuploadProof = (record: any) => {
     this.UploadVaccineLicense(record);
-  };
-  public ClosedProfile = () => {
-    this.setState(
-      {
-        UserProfileVisible: false,
-        UserProfileId: '',
-      },
-      () => {
-        this.ListPetRecords();
-      },
-    );
   };
 
   public ListPetRecords = () => {
@@ -389,7 +391,18 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
     });
   };
   componentDidMount() {
-    this.ListPetRecords();
+    const { SearchKeyword } = this.props;
+    console.log(SearchKeyword, 'SearchKeyword');
+
+    if (SearchKeyword) {
+      // TODO 参数形式
+      this.setState({
+        Keyword: SearchKeyword,
+      });
+      this.SearchPetRecords(SearchKeyword);
+    } else {
+      this.ListPetRecords();
+    }
   }
 
   render() {
@@ -399,6 +412,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
       AddPetVisible,
       PetProfileVisible,
       PetProfileId,
+      PetProfile,
       VaccineId,
       UploadLicenseVisible,
 
@@ -406,7 +420,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
       PageNumber,
       PageSize,
       UserRecords,
-      UserCount,
+      PetCount,
     } = this.state;
 
     return (
@@ -421,24 +435,42 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
               )}
 
               <Space>
-                <div className="control search">
-                  <input
-                    type="text"
-                    value={Keyword}
+                <div>
+                  <Select
+                    showSearch
+                    style={{ width: 300 }}
+                    allowClear
                     placeholder="宠物搜索"
-                    onChange={this.handleChange}
-                    onKeyDown={this.onKeyDownchange}
-                  />
-                  <Button
+                    onSelect={this.handleSelect}
+                    value={Keyword}
+                    // onKeyDown={this.onKeyDownchange}
+                  >
+                    <Option value="汪星人" title="汪星人">
+                      汪星人
+                    </Option>
+                    <Option value="喵星人" title="喵星人">
+                      喵星人
+                    </Option>
+                    <Option value="啮齿动物" title="啮齿动物">
+                      啮齿动物
+                    </Option>
+                    <Option value="猛禽" title="猛禽">
+                      猛禽
+                    </Option>
+                    <Option value="爬行动物" title="爬行动物">
+                      爬行动物
+                    </Option>
+                  </Select>
+                  {/* <Button
                     icon={<SearchOutlined />}
                     transparent
                     onClick={this.handleSearch}
-                  />
+                  /> */}
                 </div>
                 <Pagination
                   current={PageNumber}
                   pageSize={PageSize}
-                  total={UserCount}
+                  total={PetCount}
                   simple={true}
                   onChange={this.onPageChange}
                 />
@@ -463,6 +495,7 @@ class PetsTable extends React.PureComponent<IPetsTableProps, IPetsTableStates> {
         )}
         {PetProfileVisible && (
           <PetProfilePanel
+            PetProfile={PetProfile}
             visible={PetProfileVisible}
             onClose={this.closeUpdatePetPanel}
           />

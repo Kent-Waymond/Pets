@@ -39,6 +39,7 @@ interface IModelEffects {
   ListAllUsers: Effect;
   GetUserProfile: Effect;
   sendCode: Effect;
+  SearchUserRecords: Effect;
   CreateUser: Effect;
 }
 
@@ -103,11 +104,22 @@ const Model: IModelType = {
       const response = yield call(Service.SearchPetRecords, {
         species,
       });
-
       yield put({
         type: 'updatePetRecord',
         payload: {
           PetRecord: response?.data?.data || null,
+        },
+      });
+    },
+    *SearchUserRecords({ payload: { name } }, { call, put }) {
+      const response = yield call(Service.SearchUserRecords, {
+        name,
+      });
+
+      yield put({
+        type: 'updateUserRecord',
+        payload: {
+          UserRecord: response?.data?.data || null,
         },
       });
     },
@@ -144,7 +156,7 @@ const Model: IModelType = {
     },
     *GetPetProfile({ payload: { petId } }, { call, put }) {
       const response = yield call(Service.GetPetProfile, { petId });
-      const PetProfile = response?.data?.data?.pet || null;
+      const PetProfile = response?.data?.data || null;
 
       yield put({
         type: 'updatePetProfile',

@@ -1,4 +1,4 @@
-import { Check_APP_AUTH_TOKEN } from '@/utils/auth';
+import { Check_USER_TOKEN } from '@/utils/auth';
 import React from 'react';
 import { Redirect } from 'umi';
 
@@ -7,7 +7,7 @@ interface IAuthorizedProps {
 }
 
 export default function Authorized(props: IAuthorizedProps) {
-  const isLogin = Check_APP_AUTH_TOKEN();
+  const isLogin = Check_USER_TOKEN();
   const { children } = props;
   if (isLogin) {
     return <>{children}</>;

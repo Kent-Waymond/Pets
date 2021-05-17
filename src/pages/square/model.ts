@@ -3,6 +3,7 @@ import { SquareRecord, SquareProfile } from './type.d';
 import * as Service from '@/request/square';
 import { Subscription, Effect } from 'umi';
 import { message } from 'antd';
+import { CommentRecord } from '../community/type';
 
 interface IModelType {
   namespace: 'square';
@@ -14,13 +15,16 @@ interface IModelType {
 
 interface IModelStates {
   Square: IBHRawListDataRecord<SquareRecord> | null;
+  Comments: IBHRawListDataRecord<CommentRecord> | null;
   SquareProfile: SquareProfile | null;
 }
 interface IModelReducers {
   updateSquareRecord: Reducer<IModelStates, any>;
+  updateCommentRecord: Reducer<IModelStates, any>;
 }
 interface IModelEffects {
   ListSquares: Effect;
+  ListComments: Effect;
   SearchSquares: Effect;
   GetSquareProfile: Effect;
   CreateSMoment: Effect;
@@ -31,6 +35,7 @@ const Model: IModelType = {
   namespace: 'square',
   state: {
     Square: null,
+    Comments: null,
     SquareProfile: null,
   },
   reducers: {
@@ -39,6 +44,13 @@ const Model: IModelType = {
       return {
         ...state,
         Square,
+      };
+    },
+    updateCommentRecord: (state: IModelStates, { payload }): IModelStates => {
+      const { Comments } = payload;
+      return {
+        ...state,
+        Comments,
       };
     },
   },
@@ -53,6 +65,18 @@ const Model: IModelType = {
         type: 'updateSquareRecord',
         payload: {
           Square: response?.data?.data || null,
+        },
+      });
+    },
+    *ListComments({ payload: { essayId } }, { call, put }) {
+      const response = yield call(Service.ListComments, {
+        essayId,
+      });
+
+      yield put({
+        type: 'updateCommentRecord',
+        payload: {
+          Comments: response?.data?.data || null,
         },
       });
     },

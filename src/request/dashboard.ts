@@ -15,7 +15,6 @@ export function ListNoticeRecords() {
   return axios.appGet('/user/getAllNotices');
 }
 export function GetNoticeProfile({ noticeId }: any) {
-  console.log(noticeId, 'axisi');
   return axios.appGet(`/user/notice/detail/${noticeId}`);
 }
 export function DeleteNotice({ noticeId }: any) {

@@ -3,8 +3,8 @@ import * as Service from '@/request/account';
 import { message } from 'antd';
 import { defineMessages } from 'react-intl';
 import {
-  SET_APP_AUTH_TOKEN,
-  REMOVE_APP_AUTH_TOKEN,
+  SET_USER_TOKEN,
+  REMOVE_USER_TOKEN,
   SET_IDENTITY,
   REMOVE_IDENTITY,
   GET_IDENTITY,
@@ -33,7 +33,7 @@ const Model: IAccountModelType = {
       const userId = response?.data?.data?.userId || '';
       if (response?.data?.code == '200' && userId) {
         if (userId) {
-          SET_APP_AUTH_TOKEN(userId);
+          SET_USER_TOKEN(userId);
           if (userId === 'tourist') {
             SET_IDENTITY('passby');
           } else if (phone === 'root') {
@@ -42,7 +42,7 @@ const Model: IAccountModelType = {
             SET_IDENTITY('petMaster');
           }
           message.success('登录成功！');
-          return true;
+          return userId;
           // const token = response?.data?.data?.token || '';
           // const res = response?.data?.data || '';
           // if (response?.data?.code == '200' && res) {
@@ -50,10 +50,10 @@ const Model: IAccountModelType = {
           //     console.log(res, 'login res');
           //     return true
           //   }
-        } else {
-          message.error('账号或密码错误');
-          return false;
         }
+      } else {
+        message.error('账号或密码错误');
+        return false;
       }
     },
     *Logout({}, { call }) {
@@ -61,13 +61,13 @@ const Model: IAccountModelType = {
         const response = yield call(Service.Logout);
       } catch (e) {
       } finally {
-        REMOVE_APP_AUTH_TOKEN();
+        REMOVE_USER_TOKEN();
         REMOVE_IDENTITY();
         window.location.reload();
         return true;
       }
       // if (response?.data?.code == '200') {
-      //   REMOVE_APP_AUTH_TOKEN();
+      //   REMOVE_USER_TOKEN();
       //   return true;
       // }
     },

@@ -5,7 +5,7 @@ import { useDispatch } from 'umi';
 import Editor from 'for-editor';
 import { BasicForm } from '@/components-compatible/Form/BasicForm';
 import { BasicFormItem } from '@/components-compatible/Form/BasicForm';
-import axios from '@/request/basicRequest';
+import { GET_USER_TOKEN } from '@/utils/auth';
 const { Option } = Select;
 interface ICreateSquarePanelProps extends DrawerProps {
   visible: boolean;
@@ -14,13 +14,13 @@ interface ICreateSquarePanelProps extends DrawerProps {
 
 function CreateSquarePanel(props: ICreateSquarePanelProps): any {
   const { visible, onClose } = props;
+  const CurrentUserID = GET_USER_TOKEN();
 
   const dispatch = useDispatch<any>();
   const [createLoading, ChangeCreateLoaidng] = useState<boolean>(false);
 
   const [editorValue, changeEditorValue] = useState<string>('');
-  const [ImageUrl, changeImageUrl] = useState<string>('');
-
+  let ImageArr: any = [];
   const [form] = Form.useForm();
 
   function handleDrawerClose(ev: any) {
@@ -37,29 +37,40 @@ function CreateSquarePanel(props: ICreateSquarePanelProps): any {
 
   async function onFormFinish(formvalues: any) {
     ChangeCreateLoaidng(true);
-    // TODO 提交editor  一起作为参数传过去
 
     const id = await dispatch({
       type: 'square/CreateSMoment',
       payload: {
         essayType: formvalues?.SquareType || '',
-        essayContent: editorValue || '',
-        essayRange: formvalues?.SquareType || '',
+        essayContent:
+          editorValue + ',ImageUrl,' + JSON.stringify(ImageArr) || '',
+        essayRange: 2,
         title: formvalues?.SquareName || '',
       },
     });
 
     if (id) {
       ChangeCreateLoaidng(false);
+      onClose();
     }
   }
   const uploadHandler = (file: File) => {
-    axios.appPost('/uploadImg', { file }).then((res: any) => {
-      // TODO 路径
-      changeImageUrl('http://100.0.01//' + res);
-      let str = editorValue + '![alt](http://100.0.01//' + res + ')';
-      changeEditorValue(str);
-    });
+    if (file) {
+      dispatch({
+        type: 'community/UploadImage',
+        payload: {
+          name: file,
+          CurrentUserID,
+        },
+      }).then((response: any) => {
+        if (response?.data?.data) {
+          ImageArr.push('119.3.249.45:7070/file/image/' + response?.data?.data);
+        }
+      });
+    }
+  };
+  const handleChange = (value: any) => {
+    changeEditorValue(value);
   };
 
   const drawerFooter = (
@@ -69,6 +80,23 @@ function CreateSquarePanel(props: ICreateSquarePanelProps): any {
       </Button>
     </div>
   );
+
+  const toolBar = {
+    h1: true, // h1
+    h2: true, // h2
+    h3: true, // h3
+    h4: true, // h4
+    img: true, // 图片
+    link: false, // 链接
+    code: false, // 代码块
+    preview: true, // 预览
+    expand: true, // 全屏
+    undo: true, // 撤销
+    redo: true, // 重做
+    save: true, // 保存
+    subfield: true, // 单双栏模式
+    addImgLink: false,
+  };
   return (
     <Drawer
       title="发布动态"
@@ -123,9 +151,10 @@ function CreateSquarePanel(props: ICreateSquarePanelProps): any {
         <Editor
           subfield={true}
           preview={true}
-          addImg={(file) => uploadHandler(file)}
+          addImg={(file, fileList) => uploadHandler(file)}
           value={editorValue}
-          onChange={(value) => changeEditorValue(value)}
+          onChange={(value) => handleChange(value)}
+          toolbar={toolBar}
         />
       </>
     </Drawer>
